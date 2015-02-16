@@ -32,13 +32,29 @@ int main(int argc, char *argv[]) {
 //        TcpClient client(*io_service, iterator);
 //        std::thread client_thread([&io_service](){io_service->run();});
 
-        TcpClient client(argv[1], argv[2]);
-        client.run();
+        //TcpClient client(argv[1], argv[2]);
+        //client.run();
 
         // Send message
         NetMessage message;
+
+        message.set_header("test", "123");
+        message.set_header("test1", "1232");
+
+        auto encoded = message.encode();
+        std::cout << encoded << std::endl;
+
+        NetMessage message1;
+        dcm::ibufstream bs(encoded);
+        int32_t len = 0;
+        dcm::read_size(bs, len);
+        message1.decode_header(dcm::buffer(encoded.data()+sizeof(int32_t), encoded.data()+sizeof(int32_t)+len));
+
+        encoded = message1.encode();
+        std::cout << encoded << std::endl;
+
         // TODO: promise
-        client.write(message);
+        //client.write(message);
         //client.close();
         //client_thread.join();
     } catch (std::exception &e) {

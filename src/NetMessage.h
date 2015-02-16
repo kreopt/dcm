@@ -11,6 +11,8 @@ private:
     std::unordered_map<std::string, dcm::buffer> header_;
     std::unordered_map<std::string, dcm::buffer> body_;
 
+    void decode(const dcm::buffer& _buf, std::unordered_map<std::string, dcm::buffer>& _container);
+
 public:
     typedef std::deque<NetMessage> MessageQueue;
 
@@ -31,7 +33,7 @@ public:
 
     void decode_header(const dcm::buffer &_encoded);
     void decode_body(const dcm::buffer &_encoded);
-    dcm::buffer&& encode();
+    dcm::buffer encode();
 
 
 };

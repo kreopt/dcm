@@ -32,7 +32,7 @@ void NetMessage::remove_data(const std::string &_name) {
     body_.erase(_name);
 }
 
-dcm::buffer &&NetMessage::encode() {
+dcm::buffer NetMessage::encode() {
     dcm::obufstream ba;
     dcm::write_size(ba, 0);
     size_t block_size = 0;
@@ -58,13 +58,35 @@ dcm::buffer &&NetMessage::encode() {
     }
     ba.seekp(pos);
     dcm::write_size(ba, block_size);
-    return std::move(ba.str());
+    return ba.str();
 }
 
 void NetMessage::decode_header(const dcm::buffer &_encoded) {
-
+    decode(_encoded, header_);
 }
 
 void NetMessage::decode_body(const dcm::buffer &_encoded) {
+    decode(_encoded, header_);
+}
 
+void NetMessage::decode(const dcm::buffer &_buf, std::unordered_map<std::string, dcm::buffer> &_container) {
+    std::string key;
+    dcm::buffer val;
+    dcm::ibufstream bs(_buf);
+    int32_t len;
+    int pos = 0;
+    while (pos < _buf.size()){
+        dcm::read_size(bs, len);
+        key.resize(len);
+        bs.read(&key[0], len);
+        pos+=len;
+
+        dcm::read_size(bs, len);
+        val.resize(len);
+        bs.read(&val[0], len);
+        pos+=len;
+
+        _container.insert(std::make_pair(key, val));
+        pos+=2*sizeof(size_t);
+    }
 }
