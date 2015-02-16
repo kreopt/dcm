@@ -4,18 +4,19 @@
 #include <sstream>
 
 namespace dcm {
+    using block_size_t = uint32_t;
     using byte_t = char;
     using buffer = std::basic_string<byte_t>;
     using ibufstream = std::basic_istringstream<byte_t>;
     using obufstream = std::basic_ostringstream<byte_t>;
 
-    inline void write_size(obufstream& _s, int32_t _sz){
+    inline void write_size(obufstream& _s, block_size_t _sz){
         _s.write(reinterpret_cast<dcm::byte_t*>(&_sz), sizeof _sz);
     }
 
-    inline void read_size(ibufstream& _s, int32_t &_sz){
+    inline void read_size(ibufstream& _s, block_size_t &_sz){
         char * lb = reinterpret_cast<char*>(&_sz);
-        _s.read(lb, sizeof(int32_t));
+        _s.read(lb, sizeof(block_size_t));
     }
 }
 #endif

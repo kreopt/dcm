@@ -41,7 +41,7 @@ dcm::buffer NetMessage::encode() {
         ba << h.first;
         dcm::write_size(ba, h.second.size());
         ba << h.second;
-        block_size += h.first.size()+h.second.size()+2*sizeof(uint32_t);
+        block_size += h.first.size()+h.second.size()+2*sizeof(dcm::block_size_t);
     }
     auto pos = ba.tellp();
     ba.seekp(0);
@@ -54,7 +54,7 @@ dcm::buffer NetMessage::encode() {
         ba << b.first;
         dcm::write_size(ba, b.second.size());
         ba << b.second;
-        block_size += b.first.size()+b.second.size()+2*sizeof(uint32_t);
+        block_size += b.first.size()+b.second.size()+2*sizeof(dcm::block_size_t);
     }
     ba.seekp(pos);
     dcm::write_size(ba, block_size);

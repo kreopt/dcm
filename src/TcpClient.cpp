@@ -1,7 +1,7 @@
 #include "TcpClient.h"
 
 // Write operation interface
-void TcpClient::write(const NetMessage &message) {
+void TcpClient::send(const NetMessage &message) {
     io_service_->post(std::bind(&TcpClient::do_write, this, message));
 }
 

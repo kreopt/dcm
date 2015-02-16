@@ -31,10 +31,9 @@ private:
 public:
     // Constructor
     TcpClient(const std::string &_host, const std::string &_port);
-    TcpClient(const std::shared_ptr<asio::io_service> &_io_service, tcp::resolver::iterator endpoint_iterator);
 
     // Client operation interfaces
-    void write(const NetMessage &message);
+    void send(const NetMessage &message);
 
     void run();
     void close();
