@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
 
         message.set_header("test", "123");
         message.set_header("test1", "1232");
+        message.set_data("testb", "1233312");
 
         auto encoded = message.encode();
         std::cout << encoded << std::endl;
@@ -48,7 +49,12 @@ int main(int argc, char *argv[]) {
         dcm::ibufstream bs(encoded);
         int32_t len = 0;
         dcm::read_size(bs, len);
-        message1.decode_header(dcm::buffer(encoded.data()+sizeof(int32_t), encoded.data()+sizeof(int32_t)+len));
+        message1.decode_header(dcm::buffer(encoded, sizeof(int32_t), len));
+
+        dcm::ibufstream bbs(dcm::buffer(encoded, sizeof(int32_t)+len));
+        int32_t len1 = 0;
+        dcm::read_size(bbs, len1);
+        message1.decode_body(dcm::buffer(encoded.begin()+2*sizeof(int32_t)+len, encoded.end()));
 
         encoded = message1.encode();
         std::cout << encoded << std::endl;

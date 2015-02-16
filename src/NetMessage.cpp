@@ -41,7 +41,7 @@ dcm::buffer NetMessage::encode() {
         ba << h.first;
         dcm::write_size(ba, h.second.size());
         ba << h.second;
-        block_size += h.first.size()+h.second.size()+2*sizeof(size_t);
+        block_size += h.first.size()+h.second.size()+2*sizeof(uint32_t);
     }
     auto pos = ba.tellp();
     ba.seekp(0);
@@ -54,7 +54,7 @@ dcm::buffer NetMessage::encode() {
         ba << b.first;
         dcm::write_size(ba, b.second.size());
         ba << b.second;
-        block_size += b.first.size()+b.second.size()+2*sizeof(size_t);
+        block_size += b.first.size()+b.second.size()+2*sizeof(uint32_t);
     }
     ba.seekp(pos);
     dcm::write_size(ba, block_size);
@@ -66,7 +66,7 @@ void NetMessage::decode_header(const dcm::buffer &_encoded) {
 }
 
 void NetMessage::decode_body(const dcm::buffer &_encoded) {
-    decode(_encoded, header_);
+    decode(_encoded, body_);
 }
 
 void NetMessage::decode(const dcm::buffer &_buf, std::unordered_map<std::string, dcm::buffer> &_container) {
