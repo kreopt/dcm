@@ -10,10 +10,10 @@
 namespace dcm {
     class message_reader {
     protected:
-        bool        is_header_;
-        size_t      block_size_;
-        dcm::buffer input_buffer_;
-        NetMessage  input_message_;
+        bool                is_header_;
+        dcm::block_size_t   block_size_;
+        dcm::buffer         input_buffer_;
+        NetMessage          input_message_;
         std::shared_ptr<asio::ip::tcp::socket>      socket_;
 
         inline void set_socket(std::shared_ptr<asio::ip::tcp::socket> &_socket){

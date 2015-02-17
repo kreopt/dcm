@@ -29,8 +29,8 @@ void dcm::message_reader::handle_read_data(const asio::error_code &error) {
 
 void dcm::message_reader::handle_read_size(const asio::error_code &error) {
     if (!error) {
-        // TODO: make sure we have read sieof(size_t) bytes
-        block_size_ = reinterpret_cast<size_t *>(*input_buffer_.begin())[0];
+        dcm::ibufstream bs(input_buffer_);
+        dcm::read_size(bs, block_size_);
         read_data();
     } else {
         // Close connection else
@@ -41,13 +41,13 @@ void dcm::message_reader::handle_read_size(const asio::error_code &error) {
 }
 
 void dcm::message_reader::read_size() {
-    input_buffer_.reserve(sizeof(size_t));
-    char *bufstart = &input_buffer_.front();
-    asio::async_read(*socket_, asio::buffer(bufstart, sizeof(size_t)), std::bind(&dcm::message_reader::handle_read_size, this, std::placeholders::_1));
+    input_buffer_.resize(dcm::BLOCK_SIZE_SIZE);
+    char *bufstart = &input_buffer_[0];
+    asio::async_read(*socket_, asio::buffer(bufstart, dcm::BLOCK_SIZE_SIZE), std::bind(&dcm::message_reader::handle_read_size, this, std::placeholders::_1));
 }
 
 void dcm::message_reader::read_data() {
-    input_buffer_.reserve(block_size_);
-    char *bufstart = &input_buffer_.front();
+    input_buffer_.resize(block_size_);
+    char *bufstart = &input_buffer_[0];
     asio::async_read(*socket_, asio::buffer(bufstart, block_size_), std::bind(&dcm::message_reader::handle_read_data, this, std::placeholders::_1));
 }

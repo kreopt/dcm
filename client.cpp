@@ -33,7 +33,9 @@ int main(int argc, char *argv[]) {
 //        std::thread client_thread([&io_service](){io_service->run();});
 
         TcpClient client(argv[1], argv[2]);
-        client.run();
+        std::thread t([&client](){
+            client.run();
+        });
 
 
         // Send message
@@ -45,8 +47,9 @@ int main(int argc, char *argv[]) {
 
         // TODO: promise
         client.send(message);
-
         client.wait_unfinished();
+        //client.close();
+        t.join();
         //client.close();
         //client_thread.join();
     } catch (std::exception &e) {

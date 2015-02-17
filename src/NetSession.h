@@ -12,7 +12,6 @@ class NetSession : public NetParticipant, public std::enable_shared_from_this<Ne
 private:
     std::shared_ptr<tcp::socket> socket_;
     NetRoom &room_;
-    NetMessage input_message_;
     NetMessage::MessageQueue output_messages_;
 
     void write_messages();

@@ -5,7 +5,9 @@
 NetSession::NetSession(asio::io_service &io_service, NetRoom &room) : socket_(std::make_shared<tcp::socket>(io_service)), room_(room) {
     set_socket(socket_);
     on_fail = [this](const asio::error_code &error){room_.leave(shared_from_this());};
-    on_read = [this](){room_.deliver(input_message_);};
+    on_read = [this](){
+        room_.deliver(input_message_);
+    };
 }
 
 std::shared_ptr<tcp::socket> &NetSession::socket() {

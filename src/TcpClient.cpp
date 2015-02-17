@@ -1,9 +1,12 @@
 #include <error.h>
 #include "TcpClient.h"
 
+
 // Write operation interface
 void TcpClient::send(const NetMessage &message) {
+    // TODO: make new promise & pass to do_write
     io_service_->post(std::bind(&TcpClient::do_write, this, message));
+    // TODO: return thenable
 }
 
 // Close operation interface
@@ -21,9 +24,11 @@ void TcpClient::do_write(NetMessage message) {
 
     // Add message to queue
     output_messages_.push_back(message);
+    // TODO: add promise to queue
 
     // Start async write for new queue
     if (!write_in_progress) {
+        // TODO: pass promise from queue to handle_write
         auto msg = output_messages_.front().encode();
         asio::async_write(*socket_, asio::buffer(msg.data(), msg.size()), std::bind(&TcpClient::handle_write, this, std::placeholders::_1));
     }
@@ -31,11 +36,12 @@ void TcpClient::do_write(NetMessage message) {
 
 // Close operation
 void TcpClient::do_close(const asio::error_code &error) {
+    std::cout << error.message() << std::endl;
     // Close connection
-    socket_->close();
-    if (client_thread_.joinable()) {
-        client_thread_.join();
+    if (socket_->is_open()) {
+        socket_->close();
     }
+    io_service_->stop();
 }
 
 //
@@ -47,12 +53,15 @@ void TcpClient::handle_connect(const asio::error_code &error) {
     if (!error) {
         // Start async read when connection succeeded
         read_size();
+    } else {
+        do_close(error);
     }
 }
 
 
 // Write message handler
 void TcpClient::handle_write(const asio::error_code &error) {
+    // TODO: resolve or reject promise
     if (!error) {
         // Check if queue non empty
         output_messages_.pop_front();
@@ -82,9 +91,7 @@ TcpClient::TcpClient(const std::string &_host, const std::string &_port) {
 
 void TcpClient::run() {
     asio::async_connect(*socket_, iterator_, std::bind(&TcpClient::handle_connect, this, std::placeholders::_1));
-    client_thread_ = std::thread([this](){
-        io_service_->run();
-    });
+    io_service_->run();
 }
 
 TcpClient::~TcpClient() {
@@ -92,5 +99,4 @@ TcpClient::~TcpClient() {
 }
 
 void TcpClient::wait_unfinished() {
-
 }
