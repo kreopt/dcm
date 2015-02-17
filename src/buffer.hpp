@@ -10,13 +10,15 @@ namespace dcm {
     using ibufstream = std::basic_istringstream<byte_t>;
     using obufstream = std::basic_ostringstream<byte_t>;
 
+    const uint32_t BLOCK_SIZE_SIZE = sizeof(block_size_t);
+
     inline void write_size(obufstream& _s, block_size_t _sz){
-        _s.write(reinterpret_cast<dcm::byte_t*>(&_sz), sizeof _sz);
+        _s.write(reinterpret_cast<dcm::byte_t*>(&_sz), dcm::BLOCK_SIZE_SIZE);
     }
 
     inline void read_size(ibufstream& _s, block_size_t &_sz){
         char * lb = reinterpret_cast<char*>(&_sz);
-        _s.read(lb, sizeof(block_size_t));
+        _s.read(lb, dcm::BLOCK_SIZE_SIZE);
     }
 }
 #endif

@@ -1,3 +1,5 @@
+#include <NetMessage.h>
+
 void test_message_encode(){
     NetMessage message;
 
@@ -8,15 +10,7 @@ void test_message_encode(){
     std::cout << encoded << std::endl;
 
     NetMessage message1;
-    dcm::ibufstream bs(encoded);
-    dcm::block_size_t len = 0;
-    dcm::read_size(bs, len);
-    message1.decode_header(dcm::buffer(encoded, sizeof(dcm::block_size_t), len));
-
-    dcm::ibufstream bbs(dcm::buffer(encoded, sizeof(int32_t)+len));
-    dcm::block_size_t len1 = 0;
-    dcm::read_size(bbs, len1);
-    message1.decode_body(dcm::buffer(encoded.begin()+2*sizeof(dcm::block_size_t)+len, encoded.end()));
+    message1.decode(encoded);
 
     encoded = message1.encode();
     std::cout << encoded << std::endl;

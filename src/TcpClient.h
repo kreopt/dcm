@@ -26,17 +26,19 @@ private:
     // Client operations
     void do_write(NetMessage message);
 
-    void do_close();
+    void do_close(const asio::error_code &error=asio::error_code());
 
 public:
     // Constructor
     TcpClient(const std::string &_host, const std::string &_port);
+    ~TcpClient();
 
     // Client operation interfaces
     void send(const NetMessage &message);
 
     void run();
     void close();
+    void wait_unfinished();
 };
 
 #endif

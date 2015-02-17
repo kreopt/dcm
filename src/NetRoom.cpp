@@ -21,7 +21,7 @@ void NetRoom::leave(NetParticipant::NetParticipantPtr participant) {
 void NetRoom::deliver(const NetMessage &message) {
     recent_messages_.push_back(message);
 
-    //std::cout << message.body() << std::endl;
+    std::cout << "caught " << message.header.at("signal") << " signal with data: "<< message.body.at("data") << std::endl;
 
     // Cleanup room message history
     while (recent_messages_.size() > NetRoom::MAX_RECENT_MESSAGES) {
@@ -30,4 +30,4 @@ void NetRoom::deliver(const NetMessage &message) {
 
     // Deliver message to all participants
     std::for_each(participants_.begin(), participants_.end(), std::bind(&NetParticipant::deliver, std::placeholders::_1, std::ref(message)));
-}
+};

@@ -29,7 +29,7 @@ namespace dcm {
         void handle_read_data(const asio::error_code &error);
 
         std::function<void()> on_read;
-        std::function<void()> on_fail;
+        std::function<void(const asio::error_code&)> on_fail;
     };
 }
 

@@ -1,3 +1,4 @@
+#include <error.h>
 #include "TcpClient.h"
 
 // Write operation interface
@@ -7,7 +8,7 @@ void TcpClient::send(const NetMessage &message) {
 
 // Close operation interface
 void TcpClient::close() {
-    io_service_->post(std::bind(&TcpClient::do_close, this));
+    io_service_->post(std::bind(&TcpClient::do_close, this, asio::error_code()));
 }
 
 //
@@ -29,7 +30,7 @@ void TcpClient::do_write(NetMessage message) {
 }
 
 // Close operation
-void TcpClient::do_close() {
+void TcpClient::do_close(const asio::error_code &error) {
     // Close connection
     socket_->close();
     if (client_thread_.joinable()) {
@@ -63,6 +64,7 @@ void TcpClient::handle_write(const asio::error_code &error) {
     }
     else {
         // Close connection else
+        std::cout << error.message() << std::endl;
         do_close();
     }
 }
@@ -75,10 +77,20 @@ TcpClient::TcpClient(const std::string &_host, const std::string &_port) {
     socket_ = std::make_shared<tcp::socket>(*io_service_);
 
     set_socket(socket_);
-    on_fail = std::bind(&TcpClient::do_close, this);
+    on_fail = std::bind(&TcpClient::do_close, this, std::placeholders::_1);
 }
 
 void TcpClient::run() {
     asio::async_connect(*socket_, iterator_, std::bind(&TcpClient::handle_connect, this, std::placeholders::_1));
-    client_thread_ = std::thread([this](){io_service_->run();});
+    client_thread_ = std::thread([this](){
+        io_service_->run();
+    });
+}
+
+TcpClient::~TcpClient() {
+    do_close();
+}
+
+void TcpClient::wait_unfinished() {
+
 }

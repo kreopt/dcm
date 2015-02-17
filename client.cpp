@@ -35,15 +35,18 @@ int main(int argc, char *argv[]) {
         TcpClient client(argv[1], argv[2]);
         client.run();
 
+
         // Send message
         NetMessage message;
 
-        message.set_header("test", "dample header");
-        message.set_data("data", "sample data");
+        message.header["signal"] = "dcm.sample.signal";
+        message.body["data"] = "sample data";
 
 
         // TODO: promise
         client.send(message);
+
+        client.wait_unfinished();
         //client.close();
         //client_thread.join();
     } catch (std::exception &e) {

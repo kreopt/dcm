@@ -1,6 +1,7 @@
 #include <functional>
 #include <asio/buffer.hpp>
 #include <asio/read.hpp>
+#include <error.h>
 #include "messagereader.hpp"
 
 // Read body handler
@@ -21,7 +22,7 @@ void dcm::message_reader::handle_read_data(const asio::error_code &error) {
     else {
         // Close connection else
         if (on_fail) {
-            on_fail();
+            on_fail(error);
         }
     }
 }
@@ -34,7 +35,7 @@ void dcm::message_reader::handle_read_size(const asio::error_code &error) {
     } else {
         // Close connection else
         if (on_fail) {
-            on_fail();
+            on_fail(error);
         }
     }
 }

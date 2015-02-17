@@ -6,74 +6,52 @@
 
 
 NetMessage::NetMessage(const dcm::buffer &_encoded) {
+    decode(_encoded);
 }
 
-NetMessage::NetMessage(dcm::buffer &&_body) {
-
+NetMessage::NetMessage(dcm::buffer &&_encoded) {
+    decode(_encoded);
 }
 
 NetMessage::NetMessage() {
 
 }
 
-void NetMessage::set_header(const std::string &_name, const dcm::buffer &_data) {
-    header_.insert(std::make_pair(_name, _data));
-}
-
-void NetMessage::remove_header(const std::string &_name) {
-    header_.erase(_name);
-}
-
-void NetMessage::set_data(const std::string &_name, const dcm::buffer &_data) {
-    body_.insert(std::make_pair(_name, _data));
-}
-
-void NetMessage::remove_data(const std::string &_name) {
-    body_.erase(_name);
-}
-
-dcm::buffer NetMessage::encode() {
+dcm::buffer NetMessage::encode_block(const NetMessage::block_t &_block) const {
     dcm::obufstream ba;
     dcm::write_size(ba, 0);
-    size_t block_size = 0;
-    for (auto &h: header_){
-        dcm::write_size(ba, h.first.size());
-        ba << h.first;
-        dcm::write_size(ba, h.second.size());
-        ba << h.second;
-        block_size += h.first.size()+h.second.size()+2*sizeof(dcm::block_size_t);
-    }
-    auto pos = ba.tellp();
-    ba.seekp(0);
-    dcm::write_size(ba, block_size);
-    ba.seekp(pos);
-    block_size = 0;
-    dcm::write_size(ba, 0);
-    for (auto &b: body_){
+    dcm::block_size_t block_size = 0;
+    for (auto &b: _block){
         dcm::write_size(ba, b.first.size());
         ba << b.first;
         dcm::write_size(ba, b.second.size());
         ba << b.second;
         block_size += b.first.size()+b.second.size()+2*sizeof(dcm::block_size_t);
     }
-    ba.seekp(pos);
+    auto pos = ba.tellp();
+    ba.seekp(0);
     dcm::write_size(ba, block_size);
+    ba.seekp(pos);
     return ba.str();
 }
 
+dcm::buffer NetMessage::encode() const {
+    return encode_block(header)+encode_block(body);
+}
+
 void NetMessage::decode_header(const dcm::buffer &_encoded) {
-    decode(_encoded, header_);
+    decode_block(_encoded, header);
 }
 
 void NetMessage::decode_body(const dcm::buffer &_encoded) {
-    decode(_encoded, body_);
+    decode_block(_encoded, body);
 }
 
-void NetMessage::decode(const dcm::buffer &_buf, std::unordered_map<std::string, dcm::buffer> &_container) {
+void NetMessage::decode_block(const dcm::buffer &_buf, std::unordered_map<std::string, dcm::buffer> &_container) {
     std::string key;
     dcm::buffer val;
     dcm::ibufstream bs(_buf);
-    int32_t len;
+    dcm::block_size_t len;
     int pos = 0;
     while (pos < _buf.size()){
         dcm::read_size(bs, len);
@@ -87,6 +65,18 @@ void NetMessage::decode(const dcm::buffer &_buf, std::unordered_map<std::string,
         pos+=len;
 
         _container.insert(std::make_pair(key, val));
-        pos+=2*sizeof(size_t);
+        pos+=2*dcm::BLOCK_SIZE_SIZE;
     }
+}
+
+void NetMessage::decode(const dcm::buffer &_encoded) {
+    dcm::ibufstream bs(_encoded);
+    dcm::block_size_t len = 0;
+    dcm::read_size(bs, len);
+    decode_header(dcm::buffer(_encoded, dcm::BLOCK_SIZE_SIZE, len));
+
+    dcm::ibufstream bbs(dcm::buffer(_encoded, dcm::BLOCK_SIZE_SIZE+len));
+    dcm::block_size_t len1 = 0;
+    dcm::read_size(bbs, len1);
+    decode_body(dcm::buffer(_encoded.begin()+2*dcm::BLOCK_SIZE_SIZE+len, _encoded.end()));
 }
