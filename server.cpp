@@ -7,8 +7,7 @@
 #include <functional>
 #include <asio.hpp>
 
-#include "TcpServer.h"
-#include "TcpClient.h"
+#include "socket/stream_socket_server.hpp"
 
 using asio::ip::tcp;
 
@@ -24,12 +23,15 @@ int main(int argc, char *argv[]) {
 
         // Create a server object
         asio::io_service io_service;
-        TcpServer::TcpServerPtrs servers;
-        for (int i = 1; i < argc; i++) {
-            tcp::endpoint endpoint(tcp::v4(), std::stoi(argv[i]));
-            TcpServer::TcpServerPtr server(new TcpServer(io_service, endpoint));
-            servers.push_back(server);
-        }
+//        dcm::tcp_server::ServerPtrs servers;
+//        for (int i = 1; i < argc; i++) {
+//            asio::ip::tcp::endpoint endpoint(tcp::v4(), std::stoi(argv[i]));
+//            dcm::tcp_server::ServerPtr server(new dcm::tcp_server(io_service, endpoint));
+//            servers.push_back(server);
+//        }
+
+        dcm::unix_server::endpoint_type ep("unix_server.sock");
+        dcm::unix_server server1(io_service, ep);
 
         // Run the io_service
         io_service.run();

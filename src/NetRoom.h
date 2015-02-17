@@ -3,7 +3,7 @@
 
 #include <set>
 
-#include "NetMessage.h"
+#include "core/message.hpp"
 
 // NetParticipant abstract class
 class NetParticipant {
@@ -12,14 +12,14 @@ public:
 
     virtual ~NetParticipant() {}
 
-    virtual void deliver(const NetMessage &message) = 0;
+    virtual void deliver(const dcm::message &message) = 0;
 };
 
 // NetRoom class
 class NetRoom {
 private:
     std::set<NetParticipant::NetParticipantPtr> participants_;
-    NetMessage::MessageQueue recent_messages_;
+    dcm::message::MessageQueue recent_messages_;
 
 public:
     static const int MAX_RECENT_MESSAGES = 100;
@@ -28,7 +28,7 @@ public:
 
     void leave(NetParticipant::NetParticipantPtr participant);
 
-    void deliver(const NetMessage &message);
+    void deliver(const dcm::message &message);
 };
 
 #endif

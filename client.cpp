@@ -9,8 +9,8 @@
 #include <asio.hpp>
 #include <fstream>
 
-#include "TcpServer.h"
-#include "TcpClient.h"
+#include "tcp_server.h"
+#include "tcp_client.h"
 
 using asio::ip::tcp;
 
@@ -29,17 +29,17 @@ int main(int argc, char *argv[]) {
 //        tcp::resolver resolver(*io_service);
 //        tcp::resolver::query query(argv[1], argv[2]);
 //        tcp::resolver::iterator iterator = resolver.resolve(query);
-//        TcpClient client(*io_service, iterator);
+//        tcp_client client(*io_service, iterator);
 //        std::thread client_thread([&io_service](){io_service->run();});
 
-        TcpClient client(argv[1], argv[2]);
+        dcm::tcp_client client(argv[1], argv[2]);
         std::thread t([&client](){
             client.run();
         });
 
 
         // Send message
-        NetMessage message;
+        message message;
 
         message.header["signal"] = "dcm.sample.signal";
         message.body["data"] = "sample data";

@@ -2,22 +2,22 @@
 #include <string>
 #include <cstring>
 #include <sstream>
-#include "NetMessage.h"
+#include "message.hpp"
 
 
-NetMessage::NetMessage(const dcm::buffer &_encoded) {
+dcm::message::message(const dcm::buffer &_encoded) {
     decode(_encoded);
 }
 
-NetMessage::NetMessage(dcm::buffer &&_encoded) {
+dcm::message::message(dcm::buffer &&_encoded) {
     decode(_encoded);
 }
 
-NetMessage::NetMessage() {
+dcm::message::message() {
 
 }
 
-dcm::buffer NetMessage::encode_block(const NetMessage::block_t &_block) const {
+dcm::buffer dcm::message::encode_block(const dcm::message::block_t &_block) const {
     dcm::obufstream ba;
     dcm::write_size(ba, 0);
     dcm::block_size_t block_size = 0;
@@ -35,19 +35,19 @@ dcm::buffer NetMessage::encode_block(const NetMessage::block_t &_block) const {
     return ba.str();
 }
 
-dcm::buffer NetMessage::encode() const {
+dcm::buffer dcm::message::encode() const {
     return encode_block(header)+encode_block(body);
 }
 
-void NetMessage::decode_header(const dcm::buffer &_encoded) {
+void dcm::message::decode_header(const dcm::buffer &_encoded) {
     decode_block(_encoded, header);
 }
 
-void NetMessage::decode_body(const dcm::buffer &_encoded) {
+void dcm::message::decode_body(const dcm::buffer &_encoded) {
     decode_block(_encoded, body);
 }
 
-void NetMessage::decode_block(const dcm::buffer &_buf, std::unordered_map<std::string, dcm::buffer> &_container) {
+void dcm::message::decode_block(const dcm::buffer &_buf, std::unordered_map<std::string, dcm::buffer> &_container) {
     std::string key;
     dcm::buffer val;
     dcm::ibufstream bs(_buf);
@@ -69,7 +69,7 @@ void NetMessage::decode_block(const dcm::buffer &_buf, std::unordered_map<std::s
     }
 }
 
-void NetMessage::decode(const dcm::buffer &_encoded) {
+void dcm::message::decode(const dcm::buffer &_encoded) {
     dcm::ibufstream bs(_encoded);
     dcm::block_size_t len = 0;
     dcm::read_size(bs, len);

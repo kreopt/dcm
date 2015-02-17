@@ -18,7 +18,7 @@ void NetRoom::leave(NetParticipant::NetParticipantPtr participant) {
 }
 
 // Deliver message to all participants
-void NetRoom::deliver(const NetMessage &message) {
+void NetRoom::deliver(const dcm::message &message) {
     recent_messages_.push_back(message);
 
     std::cout << "caught " << message.header.at("signal") << " signal with data: "<< message.body.at("data") << std::endl;
@@ -29,5 +29,7 @@ void NetRoom::deliver(const NetMessage &message) {
     }
 
     // Deliver message to all participants
-    std::for_each(participants_.begin(), participants_.end(), std::bind(&NetParticipant::deliver, std::placeholders::_1, std::ref(message)));
+    for (auto &participant: participants_){
+        participant->deliver(message);
+    }
 };
