@@ -22,7 +22,6 @@ int main(int argc, char *argv[]) {
         }
 
         // Create a server object
-        asio::io_service io_service;
 //        dcm::tcp_server::ServerPtrs servers;
 //        for (int i = 1; i < argc; i++) {
 //            asio::ip::tcp::endpoint endpoint(tcp::v4(), std::stoi(argv[i]));
@@ -30,11 +29,9 @@ int main(int argc, char *argv[]) {
 //            servers.push_back(server);
 //        }
 
-        dcm::unix_server::endpoint_type ep("unix_server.sock");
-        dcm::unix_server server1(io_service, ep);
-
+        std::shared_ptr<dcm::server> server = dcm::make_server(dcm::connection_type::unix, "unix_server.sock");
+        server->start();
         // Run the io_service
-        io_service.run();
     } catch (std::exception &e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }

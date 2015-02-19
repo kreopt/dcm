@@ -18,7 +18,7 @@ namespace dcm {
         dcm::message input_message_;
         std::shared_ptr<socket_type> socket_;
 
-        inline void set_socket(std::shared_ptr<socket_type> &_socket) {
+        inline void set_reader_socket(std::shared_ptr<socket_type> &_socket) {
             socket_ = _socket;
         };
     public:
@@ -46,8 +46,8 @@ namespace dcm {
                 read_data();
             } else {
                 // Close connection else
-                if (on_fail) {
-                    on_fail(_error);
+                if (on_read_fail) {
+                    on_read_fail(_error);
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace dcm {
                 } else {
                     input_message_.decode_body(input_buffer_);
                     if (on_read) {
-                        on_read();
+                        on_read(input_message_);
                     }
                 }
                 is_header_ = !is_header_;
@@ -68,14 +68,14 @@ namespace dcm {
             }
             else {
                 // Close connection else
-                if (on_fail) {
-                    on_fail(_error);
+                if (on_read_fail) {
+                    on_read_fail(_error);
                 }
             }
         }
 
-        std::function<void()> on_read;
-        std::function<void(const asio::error_code &)> on_fail;
+        std::function<void(const message &_message)> on_read;
+        std::function<void(const asio::error_code &)> on_read_fail;
     };
 }
 

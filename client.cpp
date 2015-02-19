@@ -9,8 +9,7 @@
 #include <asio.hpp>
 #include <fstream>
 
-#include "tcp_server.h"
-#include "tcp_client.h"
+#include "socket/stream_socket_client.hpp"
 
 using asio::ip::tcp;
 
@@ -32,24 +31,25 @@ int main(int argc, char *argv[]) {
 //        tcp_client client(*io_service, iterator);
 //        std::thread client_thread([&io_service](){io_service->run();});
 
-        dcm::tcp_client client(argv[1], argv[2]);
-        std::thread t([&client](){
-            client.run();
-        });
+        auto client = dcm::make_client(dcm::connection_type::unix, "unix_server.sock");
+//        std::thread t([&client](){
+//            client.run();
+//        });
 
 
         // Send message
-        message message;
+        dcm::message message;
 
         message.header["signal"] = "dcm.sample.signal";
         message.body["data"] = "sample data";
 
 
         // TODO: promise
-        client.send(message);
-        client.wait_unfinished();
+        client->send(message);
+        client->connect();
+        //client.wait_unfinished();
         //client.close();
-        t.join();
+        //t.join();
         //client.close();
         //client_thread.join();
     } catch (std::exception &e) {
