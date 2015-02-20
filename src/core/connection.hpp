@@ -3,7 +3,8 @@
 namespace dcm {
     enum class connection_type {
         tcp,
-        unix
+        unix,
+        mp
     };
 }
 #endif

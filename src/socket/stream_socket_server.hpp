@@ -2,6 +2,7 @@
 #define __DCM_SOCKET_SERVER_
 
 #include <list>
+#include <set>
 #include <asio.hpp>
 
 #include "core/connection.hpp"
@@ -15,6 +16,8 @@ namespace dcm {
     public:
         virtual ~server(){}
         virtual void start() = 0;
+
+        std::function<void(message &&_message)> on_message;
     };
 
     // tcp_server class
@@ -26,7 +29,7 @@ namespace dcm {
 
         std::shared_ptr<asio::io_service>    io_service_;
         std::shared_ptr<acceptor_type>       acceptor_;
-        NetRoom room_;
+        std::set<std::shared_ptr<stream_socket_server_session<socket_type>>> sessions_;
 
         // Event handlers
         void handle_accept(std::shared_ptr<stream_socket_server_session<socket_type>> session, const asio::error_code &error) {
@@ -38,7 +41,12 @@ namespace dcm {
 
         // Initiates an asynchronous accept operation to wait for a new connection
         void start_accept(){
-            std::shared_ptr<stream_socket_server_session<socket_type>> new_session(new stream_socket_server_session<socket_type>(*io_service_, room_));
+            auto new_session=std::make_shared<stream_socket_server_session<socket_type>>(*io_service_);
+            new_session->on_message = on_message;
+            new_session->on_error = [this](std::shared_ptr<stream_socket_server_session<socket_type>> _session){
+                sessions_.erase(_session);
+            };
+            sessions_.insert(new_session);
             acceptor_->async_accept(*new_session->socket(),
                     std::bind(&stream_socket_server<protocol_type>::handle_accept,
                             this, new_session, std::placeholders::_1));
@@ -67,8 +75,13 @@ namespace dcm {
 
     inline std::shared_ptr<server> make_server(connection_type _type, const std::string &_ep){
         switch (_type) {
-            case connection_type::unix: return std::make_shared<unix_server>(_ep);
+            case connection_type::unix: {
+                std::remove(_ep.c_str());
+                return std::make_shared<unix_server>(_ep);
+            }
             case connection_type::tcp: return std::make_shared<tcp_server>(_ep);
+            default:
+                return nullptr;
         }
     };
 }

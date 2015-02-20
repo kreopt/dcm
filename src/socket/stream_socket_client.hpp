@@ -3,6 +3,7 @@
 
 #include <asio.hpp>
 #include <thread>
+#include <error.h>
 
 #include "core/message.hpp"
 #include "core/connection.hpp"
@@ -20,7 +21,7 @@ namespace dcm {
         virtual void connect() = 0;
         virtual void send(const message &_message) = 0;
         virtual void close(const asio::error_code &error = asio::error_code()) = 0;
-        std::function<void(const message &)> on_message;
+        std::function<void(message &&)> on_message;
     };
 
     template <typename protocol_type>
@@ -34,6 +35,7 @@ namespace dcm {
         std::shared_ptr<asio::io_service>                   io_service_;
         std::shared_ptr<socket_type>                        socket_;
         typename protocol_type::endpoint                    endpoint_;
+        std::thread                                         client_thread_;
 
 
         // Event handlers
@@ -66,7 +68,7 @@ namespace dcm {
             endpoint_ = dcm::make_endpoint<endpoint_type>(_endpoint, *io_service_);
             this->set_reader_socket(socket_);
             this->set_writer_socket(socket_);
-            this->on_read = this->on_message;
+            this->on_message = this->on_message;
             this->on_read_fail = std::bind(&stream_socket_client<protocol_type>::close, this, std::placeholders::_1);
             this->on_write_fail = this->on_read_fail;
         }
@@ -77,7 +79,9 @@ namespace dcm {
 
         virtual void connect() override{
             socket_->async_connect(endpoint_, std::bind(&stream_socket_client<protocol_type>::handle_connect, this, std::placeholders::_1));
-            io_service_->run();
+            client_thread_ = std::thread([this](){
+                io_service_->run();
+            });
         }
 
         virtual void send(const message &_message) override{
@@ -88,7 +92,15 @@ namespace dcm {
             if (socket_->is_open()) {
                 socket_->close();
             }
-            io_service_->stop();
+            if (!io_service_->stopped()) {
+                io_service_->stop();
+            }
+            if (error) {
+                std::cerr << error.message() << std::endl;
+            }
+            if (client_thread_.joinable()){
+                client_thread_.join();
+            }
         }
     };
     using tcp_client = stream_socket_client<asio::ip::tcp>;

@@ -2,6 +2,7 @@
 #include <string>
 #include <cstring>
 #include <sstream>
+#include <iostream>
 #include "message.hpp"
 
 
@@ -64,7 +65,7 @@ void dcm::message::decode_block(const dcm::buffer &_buf, std::unordered_map<std:
         bs.read(&val[0], len);
         pos+=len;
 
-        _container.insert(std::make_pair(key, val));
+        _container[key] = val;
         pos+=2*dcm::BLOCK_SIZE_SIZE;
     }
 }
@@ -79,4 +80,12 @@ void dcm::message::decode(const dcm::buffer &_encoded) {
     dcm::block_size_t len1 = 0;
     dcm::read_size(bbs, len1);
     decode_body(dcm::buffer(_encoded.begin()+2*dcm::BLOCK_SIZE_SIZE+len, _encoded.end()));
+}
+
+dcm::message::message(dcm::message &&_message) {
+    std::cout << "move" << std::endl;
+    this->header = std::move(_message.header);
+    _message.header.clear();
+    this->body = std::move(_message.body);
+    _message.body.clear();
 }

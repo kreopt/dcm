@@ -27,6 +27,9 @@ namespace dcm {
 
         message(dcm::buffer &&_encoded);
 
+        message(dcm::message &&_message);
+        message(const dcm::message &_message) = default;
+
         void decode_header(const dcm::buffer &_encoded);
 
         void decode_body(const dcm::buffer &_encoded);

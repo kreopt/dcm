@@ -32,26 +32,21 @@ int main(int argc, char *argv[]) {
 //        std::thread client_thread([&io_service](){io_service->run();});
 
         auto client = dcm::make_client(dcm::connection_type::unix, "unix_server.sock");
-//        std::thread t([&client](){
-//            client.run();
-//        });
-
-
-        // Send message
-        dcm::message message;
-
-        message.header["signal"] = "dcm.sample.signal";
-        message.body["data"] = "sample data";
-
-
-        // TODO: promise
-        client->send(message);
         client->connect();
-        //client.wait_unfinished();
-        //client.close();
-        //t.join();
-        //client.close();
-        //client_thread.join();
+
+        int i = 0;
+        while (true) {
+            dcm::message message;
+            message.header["signal"] = "dcm.sample.signal";
+            message.body["data"] = "sample data " + std::to_string(i);
+
+            client->send(message);
+            //std::this_thread::sleep_for(std::chrono::seconds(1));
+            i++;
+            if (i>10) break;
+        }
+
+        client->close();
     } catch (std::exception &e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }

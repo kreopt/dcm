@@ -59,14 +59,14 @@ namespace dcm {
                     input_message_.decode_header(input_buffer_);
                 } else {
                     input_message_.decode_body(input_buffer_);
-                    if (on_read) {
-                        on_read(input_message_);
+                    if (on_message) {
+                        dcm::message msg(std::move(input_message_));
+                        on_message(std::move(msg));
                     }
                 }
                 is_header_ = !is_header_;
                 read_size();
-            }
-            else {
+            } else {
                 // Close connection else
                 if (on_read_fail) {
                     on_read_fail(_error);
@@ -74,7 +74,7 @@ namespace dcm {
             }
         }
 
-        std::function<void(const message &_message)> on_read;
+        std::function<void(message &&_message)> on_message;
         std::function<void(const asio::error_code &)> on_read_fail;
     };
 }

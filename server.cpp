@@ -30,6 +30,9 @@ int main(int argc, char *argv[]) {
 //        }
 
         std::shared_ptr<dcm::server> server = dcm::make_server(dcm::connection_type::unix, "unix_server.sock");
+        server->on_message = [](dcm::message &&_message) {
+            std::cout << "caught " << _message.header.at("signal") << " signal with data: "<< _message.body.at("data") << std::endl;
+        };
         server->start();
         // Run the io_service
     } catch (std::exception &e) {
