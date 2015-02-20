@@ -21,11 +21,11 @@ namespace dcm {
                 : socket_(std::make_shared<socket_type>(io_service)) {
             this->set_reader_socket(socket_);
             this->set_writer_socket(socket_);
-            this->on_read_fail = [this](const asio::error_code &error) {
+            this->on_read_fail_ = [this](const asio::error_code &error) {
                 std::cerr << error.message() << std::endl;
-                on_error(this->shared_from_this());
+                if (on_error) on_error(this->shared_from_this());
             };
-            this->on_write_fail = this->on_read_fail;
+            this->on_write_fail_ = this->on_read_fail_;
 
         }
 
@@ -39,7 +39,7 @@ namespace dcm {
         // Session operations
         void start() {
             // Check input buffer
-            this->read_size();
+            this->read_size_block();
         }
 
         // Overloads

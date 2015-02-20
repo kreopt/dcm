@@ -83,7 +83,6 @@ void dcm::message::decode(const dcm::buffer &_encoded) {
 }
 
 dcm::message::message(dcm::message &&_message) {
-    std::cout << "move" << std::endl;
     this->header = std::move(_message.header);
     _message.header.clear();
     this->body = std::move(_message.body);
