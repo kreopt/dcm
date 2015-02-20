@@ -14,15 +14,6 @@ IpcServer::IpcServer() {
 int IpcServer::TestSharedMemory() {
     // I. Created shared memory object in parent process:
     // Remove shared memory on construction and destruction
-    struct shmem_remove {
-        shmem_remove() {
-            shared_memory_object::remove("MySharedMemory");
-        }
-
-        ~shmem_remove() {
-            shared_memory_object::remove("MySharedMemory");
-        }
-    } remover;
 
     // Create shared memory object
     shared_memory_object shmem_write(create_only, "MySharedMemory", read_write);

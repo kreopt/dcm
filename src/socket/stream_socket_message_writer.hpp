@@ -7,6 +7,7 @@
 #include "core/message.hpp"
 
 namespace dcm {
+    // TODO: timeouts
     template <typename socket_type>
     class stream_socket_message_writer {
     protected:

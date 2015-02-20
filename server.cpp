@@ -1,6 +1,3 @@
-// TCP: http://think-async.com/Asio/asio-1.10.2/doc/
-// IPC: http://www.boost.org/doc/libs/1_56_0/doc/html/interprocess.html
-
 #define ASIO_STANDALONE 1
 
 #include <iostream>
@@ -32,6 +29,9 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<dcm::server> server = dcm::make_server(dcm::connection_type::unix, "unix_server.sock");
         server->on_message = [](dcm::message &&_message) {
             std::cout << "caught " << _message.header.at("signal") << " signal with data: "<< _message.body.at("data") << std::endl;
+            // TODO: run subscription resolver
+            // TODO: IPC: MP send header
+            // TODO: IPC: ShMem send body
         };
         server->start();
         // Run the io_service

@@ -37,6 +37,8 @@ namespace dcm {
         virtual void decode(const dcm::buffer &_encoded) override;
 
         virtual dcm::buffer encode() const override;
+        dcm::buffer encode_header() const;
+        dcm::buffer encode_body() const;
 
         block_t header;
         block_t body;

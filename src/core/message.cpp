@@ -88,3 +88,11 @@ dcm::message::message(dcm::message &&_message) {
     this->body = std::move(_message.body);
     _message.body.clear();
 }
+
+dcm::buffer dcm::message::encode_header() const {
+    return encode_block(header);
+}
+
+dcm::buffer dcm::message::encode_body() const {
+    return encode_block(body);
+}
