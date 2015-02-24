@@ -16,6 +16,7 @@ namespace dcm {
     public:
         virtual ~server(){}
         virtual void start() = 0;
+        virtual void stop() = 0;
 
         std::function<void(message &&_message)> on_message;
     };
@@ -68,6 +69,11 @@ namespace dcm {
             start_accept();
             io_service_->run();
         }
+        virtual void stop() override {
+            if (!io_service_->stopped()) {
+                io_service_->stop();
+            }
+        };
     };
 
     using tcp_server = stream_socket_server<asio::ip::tcp>;
