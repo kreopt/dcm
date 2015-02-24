@@ -6,7 +6,7 @@
 namespace dcm {
     namespace ipc {
         namespace shm {
-            class client {
+            class receiver {
             public:
                 dcm::buffer get(const std::string &_name);
             };

@@ -3,8 +3,8 @@
 
 #include <functional>
 #include <asio/error_code.hpp>
-#include "core/buffer.hpp"
-#include "core/message.hpp"
+#include "../core/buffer.hpp"
+#include "../core/message.hpp"
 
 namespace dcm {
     // TODO: timeouts

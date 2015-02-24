@@ -5,9 +5,10 @@
 #include <thread>
 #include <error.h>
 #include <mutex>
+#include <iostream>
 
-#include "core/message.hpp"
-#include "core/connection.hpp"
+#include "../core/message.hpp"
+#include "../core/connection.hpp"
 #include "stream_socket_message_reader.hpp"
 #include "stream_socket_message_writer.hpp"
 #include "endpoint.hpp"
@@ -79,6 +80,7 @@ namespace dcm {
 
         ~stream_socket_client() {
             std::cout << "destroy client" << std::endl;
+            can_close_mtx_.unlock();
             close();
         }
 

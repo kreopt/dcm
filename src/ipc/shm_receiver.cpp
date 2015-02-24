@@ -1,4 +1,4 @@
-#include "shm_client.hpp"
+#include "shm_receiver.hpp"
 
 #include <cstring>
 #include <boost/interprocess/shared_memory_object.hpp>
@@ -6,7 +6,7 @@
 
 namespace bip = boost::interprocess;
 
-dcm::buffer dcm::ipc::shm::client::get(const std::string& _name){
+dcm::buffer dcm::ipc::shm::receiver::get(const std::string& _name){
     bip::shared_memory_object shmem_read(bip::open_only, _name.c_str(), bip::read_only);
 
     // Map the whole shared memory in this process

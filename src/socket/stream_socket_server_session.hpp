@@ -4,8 +4,10 @@
 #include <asio.hpp>
 #include <error.h>
 
-#include "socket/stream_socket_message_reader.hpp"
-#include "socket/stream_socket_message_writer.hpp"
+#include <iostream>
+
+#include "stream_socket_message_reader.hpp"
+#include "stream_socket_message_writer.hpp"
 namespace dcm {
     template <typename socket_type>
     class stream_socket_server_session : public dcm::stream_socket_message_reader<socket_type>,

@@ -5,7 +5,7 @@
 #include <set>
 #include <asio.hpp>
 
-#include "core/connection.hpp"
+#include "../core/connection.hpp"
 #include "endpoint.hpp"
 #include "stream_socket_server_session.hpp"
 

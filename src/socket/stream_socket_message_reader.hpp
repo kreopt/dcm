@@ -5,8 +5,8 @@
 #include <asio/error_code.hpp>
 #include <asio/ip/tcp.hpp>
 #include <asio/read.hpp>
-#include "core/buffer.hpp"
-#include "core/message.hpp"
+#include "../core/buffer.hpp"
+#include "../core/message.hpp"
 
 namespace dcm {
     // TODO: timeouts

@@ -10,7 +10,7 @@
 namespace dcm {
     namespace ipc {
         namespace shm {
-            class server {
+            class sender {
                 struct shmem_remover {
                     shmem_remover(const std::string &_name) {
                         name_ = _name;
