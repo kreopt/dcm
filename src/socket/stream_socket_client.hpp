@@ -41,30 +41,41 @@ namespace dcm {
         volatile size_t                                     pending_count_;
         std::mutex                                          pending_ops_mtx_;
         std::mutex                                          can_close_mtx_;
-
+        volatile bool stopped_;
+        volatile bool connected_;
 
         // Event handlers
         void handle_connect(const asio::error_code &error) {
             if (!error) {
+                std::cerr << "DCM client connected" << std::endl;
+                socket_->set_option(typename socket_type::enable_connection_aborted(true));
+                socket_->set_option(typename socket_type::linger(true, 30));
+                connected_ = true;
                 this->read_size_block();
             } else {
-                close(error);
+                std::cerr << "DCM Client failed to connect: " << error.message() << std::endl;
+                connected_ = false;
             }
         }
 
     public:
         // Constructor
         stream_socket_client(const std::string &_endpoint){
-            io_service_ = std::make_shared<asio::io_service>();
-            socket_ = std::make_shared<socket_type >(*io_service_);
-            endpoint_ = dcm::make_endpoint<endpoint_type>(_endpoint, *io_service_);
             pending_count_ = 0;
+            stopped_ = true;
+            connected_ = false;
+            io_service_ = std::make_shared<asio::io_service>();
+            endpoint_ = dcm::make_endpoint<endpoint_type>(_endpoint, *io_service_);
+            socket_ = std::make_shared<socket_type >(*io_service_);
             this->set_reader_socket(socket_);
             this->set_writer_socket(socket_);
+
             this->on_read_fail_ = [this](const asio::error_code &error){
                 std::lock_guard<std::mutex> lck(pending_ops_mtx_);
                 can_close_mtx_.unlock();
-                close();
+                pending_count_=0;
+                //close();    // TODO: try to reconnect
+                io_service_->stop();
             };
             this->on_write_fail_ = this->on_read_fail_;
             this->on_write = [this](){
@@ -84,22 +95,38 @@ namespace dcm {
             close();
         }
 
-        virtual void connect() override{
-            socket_->async_connect(endpoint_, std::bind(&stream_socket_client<protocol_type>::handle_connect, this->shared_from_this(), std::placeholders::_1));
+        virtual void connect() override {
+            stopped_ = false;
             client_thread_ = std::thread([this](){
-                io_service_->run();
+                while (!stopped_) {
+                    if (socket_->is_open()) {
+                        socket_->cancel();
+                        socket_->close();
+                    }
+                    io_service_->stop();
+                    io_service_->reset();
+
+                    socket_->async_connect(endpoint_, std::bind(&stream_socket_client<protocol_type>::handle_connect, this->shared_from_this(), std::placeholders::_1));
+                    io_service_->run();
+                    connected_ = false;
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
             });
         }
 
         virtual void send(const message &_message) override {
-            {
-                std::lock_guard<std::mutex> lck(pending_ops_mtx_);
-                pending_count_++;
+            if (connected_) {
+                {
+                    std::lock_guard<std::mutex> lck(pending_ops_mtx_);
+                    pending_count_++;
+                }
+                this->write_message(_message);
             }
-            this->write_message(_message);
         }
 
         virtual void close(const asio::error_code &error = asio::error_code()) override {
+            std::cerr << "close client" << std::endl;
+            stopped_ = true;
             can_close_mtx_.lock();
             if (socket_->is_open()) {
                 socket_->close();
@@ -109,9 +136,6 @@ namespace dcm {
             }
             if (error) {
                 std::cerr << error.message() << std::endl;
-            }
-            if (client_thread_.joinable()){
-                client_thread_.join();
             }
         }
     };
