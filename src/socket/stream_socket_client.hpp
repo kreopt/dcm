@@ -53,7 +53,7 @@ namespace dcm {
                 connected_ = true;
                 this->read_size_block();
             } else {
-                std::cerr << "DCM Client failed to connect: " << error.message() << std::endl;
+                //std::cerr << "DCM Client failed to connect: " << error.message() << std::endl;
                 connected_ = false;
             }
         }
@@ -71,6 +71,9 @@ namespace dcm {
             this->set_writer_socket(socket_);
 
             this->on_read_fail_ = [this](const asio::error_code &error){
+                if (error) {
+                    std::cerr << error.message() << std::endl;
+                }
                 std::lock_guard<std::mutex> lck(pending_ops_mtx_);
                 can_close_mtx_.unlock();
                 pending_count_=0;
@@ -108,6 +111,7 @@ namespace dcm {
 
                     socket_->async_connect(endpoint_, std::bind(&stream_socket_client<protocol_type>::handle_connect, this->shared_from_this(), std::placeholders::_1));
                     io_service_->run();
+                    can_close_mtx_.unlock();
                     connected_ = false;
                     std::this_thread::sleep_for(std::chrono::seconds(1));
                 }
@@ -120,6 +124,7 @@ namespace dcm {
                     std::lock_guard<std::mutex> lck(pending_ops_mtx_);
                     pending_count_++;
                 }
+                can_close_mtx_.try_lock();
                 this->write_message(_message);
             }
         }

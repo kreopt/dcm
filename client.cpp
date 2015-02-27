@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 //        tcp_client client(*io_service, iterator);
 //        std::thread client_thread([&io_service](){io_service->run();});
 
-        auto client = dcm::make_client(dcm::connection_type::unix, "unix_server.sock");
+        auto client = dcm::make_client(dcm::connection_type::unix, "/home/wf34/h2w.sock");
         client->connect();
 
         int i = 0;
@@ -41,9 +41,9 @@ int main(int argc, char *argv[]) {
             message.body["data"] = "sample data " + std::to_string(i);
 
             client->send(message);
-            //std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             i++;
-            if (i>10) break;
+            //if (i>10) break;
         }
 
         client->close();

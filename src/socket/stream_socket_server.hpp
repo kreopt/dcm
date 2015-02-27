@@ -4,10 +4,13 @@
 #include <list>
 #include <set>
 #include <asio.hpp>
+#include <thread>
 
 #include "../core/connection.hpp"
 #include "endpoint.hpp"
 #include "stream_socket_server_session.hpp"
+
+// TODO: catch sigint
 
 using asio::ip::tcp;
 
@@ -17,6 +20,7 @@ namespace dcm {
         virtual ~server(){}
         virtual void start() = 0;
         virtual void stop() = 0;
+        virtual void join() = 0;
 
         std::function<void(message &&_message)> on_message;
     };
@@ -31,6 +35,7 @@ namespace dcm {
         std::shared_ptr<asio::io_service>    io_service_;
         std::shared_ptr<acceptor_type>       acceptor_;
         std::set<std::shared_ptr<stream_socket_server_session<socket_type>>> sessions_;
+        std::thread                          server_thread_;
 
         // Event handlers
         void handle_accept(std::shared_ptr<stream_socket_server_session<socket_type>> session, const asio::error_code &error) {
@@ -65,13 +70,29 @@ namespace dcm {
             acceptor_ = std::make_shared<acceptor_type>(*io_service_, ep);
         }
 
+        ~stream_socket_server(){
+            std::cout << "destroy server" << std::endl;
+            stop();
+        }
+
         virtual void start() override {
-            start_accept();
-            io_service_->run();
+            server_thread_ = std::thread([this](){
+                start_accept();
+                io_service_->run();
+                std::cout << "io stopped" << std::endl;
+            });
         }
         virtual void stop() override {
             if (!io_service_->stopped()) {
                 io_service_->stop();
+            }
+            if (server_thread_.joinable()) {
+                server_thread_.join();
+            }
+        };
+        virtual void join() override {
+            if (server_thread_.joinable()) {
+                server_thread_.join();
             }
         };
     };

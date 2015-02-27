@@ -24,8 +24,10 @@ namespace dcm {
             this->set_reader_socket(socket_);
             this->set_writer_socket(socket_);
             this->on_read_fail_ = [this](const asio::error_code &error) {
-                std::cerr << error.message() << std::endl;
-                if (on_error) on_error(this->shared_from_this());
+                if (error) {
+                    std::cerr << error.message() << std::endl;
+                    if (on_error) on_error(this->shared_from_this());
+                }
             };
             this->on_write_fail_ = this->on_read_fail_;
 

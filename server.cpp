@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
         };
         server->start();
         // Run the io_service
+        std::this_thread::sleep_for(std::chrono::seconds(5));
     } catch (std::exception &e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }
