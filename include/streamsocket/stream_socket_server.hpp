@@ -1,28 +1,31 @@
-#ifndef __DCM_SOCKET_SERVER_
-#define __DCM_SOCKET_SERVER_
+#ifndef __netlib_SOCKET_SERVER_
+#define __netlib_SOCKET_SERVER_
 
 #include <list>
 #include <set>
 #include <asio.hpp>
 #include <thread>
 
-#include "../core/connection.hpp"
+#include "netlib.hpp"
 #include "endpoint.hpp"
+#include "connection.hpp"
 #include "stream_socket_server_session.hpp"
 
 // TODO: catch sigint
 
 using asio::ip::tcp;
 
-namespace dcm {
+namespace netlib {
     class server{
     public:
         virtual ~server(){}
         virtual void start() = 0;
         virtual void stop() = 0;
         virtual void join() = 0;
+        virtual void broadcast(const netlib::buffer &_buf) = 0;
+        // TODO: send to single instance
 
-        std::function<void(message &&_message)> on_message;
+        std::function<void(netlib::buffer &&_buf)> on_message;
     };
 
     // tcp_server class
@@ -66,13 +69,19 @@ namespace dcm {
         // Constructor
         explicit stream_socket_server(const std::string &_endpoint) {
             io_service_ = std::make_shared<asio::io_service>();
-            endpoint_type ep = dcm::make_endpoint<endpoint_type>(_endpoint, *io_service_);
+            endpoint_type ep = netlib::make_endpoint<endpoint_type>(_endpoint, *io_service_);
             acceptor_ = std::make_shared<acceptor_type>(*io_service_, ep);
         }
 
         ~stream_socket_server(){
             std::cout << "destroy server" << std::endl;
             stop();
+        }
+
+        virtual void broadcast(const netlib::buffer &_buf) {
+            for (auto &session: sessions_) {
+                session->send(_buf);
+            }
         }
 
         virtual void start() override {
@@ -100,7 +109,7 @@ namespace dcm {
     using tcp_server = stream_socket_server<asio::ip::tcp>;
     using unix_server = stream_socket_server<asio::local::stream_protocol>;
 
-    inline std::shared_ptr<server> make_server(connection_type _type, const std::string &_ep){
+    inline std::shared_ptr<server> make_server(streamsocket_type _type, const std::string &_ep){
         switch (_type) {
             case connection_type::unix: {
                 std::remove(_ep.c_str());

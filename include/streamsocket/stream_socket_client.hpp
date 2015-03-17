@@ -1,5 +1,5 @@
-#ifndef __DCM_SOCKET_CLIENT_
-#define __DCM_SOCKET_CLIENT_
+#ifndef __NETLIB_SOCKET_CLIENT_
+#define __NETLIB_SOCKET_CLIENT_
 
 #include <asio.hpp>
 #include <thread>
@@ -7,28 +7,26 @@
 #include <mutex>
 #include <iostream>
 
-#include "../core/message.hpp"
-#include "../core/connection.hpp"
-#include "stream_socket_message_reader.hpp"
-#include "stream_socket_message_writer.hpp"
+#include "netlib.hpp"
+#include "connection.hpp"
 #include "endpoint.hpp"
+#include "stream_socket_reader.hpp"
+#include "stream_socket_writer.hpp"
 
 using asio::ip::tcp;
 
-namespace dcm {
+namespace netlib {
 
-    class client{
+    class client {
     public:
         virtual ~client(){}
         virtual void connect() = 0;
-        virtual void send(const message &_message) = 0;
+        virtual void send(const buffer &_buf) = 0;
         virtual void close(const asio::error_code &error = asio::error_code()) = 0;
     };
 
     template <typename protocol_type>
     class stream_socket_client : public client,
-                                 public dcm::stream_socket_message_reader<typename protocol_type::socket>,
-                                 public dcm::stream_socket_message_writer<typename protocol_type::socket>,
                                  public std::enable_shared_from_this<stream_socket_client<protocol_type>> {
     private:
         using socket_type = typename protocol_type::socket;
@@ -41,6 +39,8 @@ namespace dcm {
         volatile size_t                                     pending_count_;
         std::mutex                                          pending_ops_mtx_;
         std::mutex                                          can_close_mtx_;
+        std::shared_ptr<stream_socket_reader<socket_type>>                   reader_;
+        std::shared_ptr<stream_socket_writer<socket_type>>                   writer_;
         volatile bool stopped_;
         volatile bool connected_;
 
@@ -51,7 +51,7 @@ namespace dcm {
                 socket_->set_option(typename socket_type::enable_connection_aborted(true));
                 socket_->set_option(typename socket_type::linger(true, 30));
                 connected_ = true;
-                this->read_size_block();
+                this->reader_->read();
             } else {
                 //std::cerr << "DCM Client failed to connect: " << error.message() << std::endl;
                 connected_ = false;
@@ -60,17 +60,18 @@ namespace dcm {
 
     public:
         // Constructor
-        stream_socket_client(const std::string &_endpoint){
+        explicit stream_socket_client(const std::string &_endpoint){
             pending_count_ = 0;
             stopped_ = true;
             connected_ = false;
             io_service_ = std::make_shared<asio::io_service>();
-            endpoint_ = dcm::make_endpoint<endpoint_type>(_endpoint, *io_service_);
+            endpoint_ = netlib::make_endpoint<endpoint_type>(_endpoint, *io_service_);
             socket_ = std::make_shared<socket_type >(*io_service_);
-            this->set_reader_socket(socket_);
-            this->set_writer_socket(socket_);
+            reader_ = std::make_shared<stream_socket_reader<socket_type>>(socket_);
+            writer_ = std::make_shared<stream_socket_writer<socket_type>>(socket_);
 
-            this->on_read_fail_ = [this](const asio::error_code &error){
+
+            this->writer_->on_fail = this->reader_->on_fail = [this](const asio::error_code &error){
                 if (error) {
                     std::cerr << error.message() << std::endl;
                 }
@@ -79,9 +80,8 @@ namespace dcm {
                 pending_count_=0;
                 //close();    // TODO: try to reconnect
                 io_service_->stop();
-            };
-            this->on_write_fail_ = this->on_read_fail_;
-            this->on_write = [this](){
+            };;
+            this->writer_->on_success = [this](){
                 std::lock_guard<std::mutex> lck(pending_ops_mtx_);
                 pending_count_--;
                 if (pending_count_ <= 0) {
@@ -118,14 +118,14 @@ namespace dcm {
             });
         }
 
-        virtual void send(const message &_message) override {
+        virtual void send(const buffer &_buf) override {
             if (connected_) {
                 {
                     std::lock_guard<std::mutex> lck(pending_ops_mtx_);
                     pending_count_++;
                 }
                 can_close_mtx_.try_lock();
-                this->write_message(_message);
+                this->writer_->write(_buf);
             }
         }
 
@@ -147,10 +147,10 @@ namespace dcm {
     using tcp_client = stream_socket_client<asio::ip::tcp>;
     using unix_client = stream_socket_client<asio::local::stream_protocol>;
 
-    inline std::shared_ptr<client> make_client(connection_type _type, const std::string &_ep){
+    inline std::shared_ptr<client> make_client(streamsocket_type _type, const std::string &_ep){
         switch (_type) {
-            case connection_type::unix: return std::make_shared<unix_client >(_ep);
-            case connection_type::tcp: return std::make_shared<tcp_client >(_ep);
+            case streamsocket_type::unix: return std::make_shared<unix_client >(_ep);
+            case streamsocket_type::tcp: return std::make_shared<tcp_client >(_ep);
         }
     };
 }
