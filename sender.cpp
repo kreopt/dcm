@@ -19,10 +19,10 @@ int main(int argc, char *argv[]) {
     try {
         // II. Start sender
         // Check command line parameters
-        if (argc != 3) {
+        /*if (argc != 3) {
             std::cerr << "Usage: Client <host> <port>" << std::endl;
             return 1;
-        }
+        }*/
 
         // Create sender object
 //        auto io_service = std::make_shared<asio::io_service>();
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 //        tcp_client sender(*io_service, iterator);
 //        std::thread client_thread([&io_service](){io_service->run();});
 
-        auto sender = dcm::streamsocket::make_sender(interproc::streamsocket_type::unix, "/home/wf34/h2w.sock");
+        auto sender = dcm::streamsocket::make_sender(interproc::streamsocket_type::unix, "unix_server.sock");
         sender->connect();
 
         int i = 0;

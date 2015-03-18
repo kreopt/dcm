@@ -1,7 +1,7 @@
 #ifndef _DCM_DCM_SOCKET_SESSION_HPP_
 #define _DCM_DCM_SOCKET_SESSION_HPP_
 
-#include <interprocess/streamsocket/receiver_session.hpp>
+#include <specforge/interprocess/streamsocket/receiver_session.hpp>
 
 namespace dcm {
     namespace streamsocket {

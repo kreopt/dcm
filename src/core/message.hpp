@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include <unordered_map>
-#include <interprocess/interproc.hpp>
+#include <specforge/interprocess/interproc.hpp>
 #include "imessage.hpp"
 namespace dcm {
 // message class

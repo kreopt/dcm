@@ -33,6 +33,7 @@ namespace interproc {
 
             // Event handlers
             void handle_accept(std::shared_ptr<session_type> session, const asio::error_code &error) {
+                std::cout << "client connected" << std::endl;
                 if (!error) {
                     session->start();
                 }

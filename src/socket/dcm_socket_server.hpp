@@ -1,8 +1,8 @@
 #ifndef _DCM_DCM_SOCKET_SERVER_HPP_
 #define _DCM_DCM_SOCKET_SERVER_HPP_
 
-#include <interprocess/streamsocket/receiver.hpp>
-#include <core/message.hpp>
+#include <specforge/interprocess/streamsocket/receiver.hpp>
+#include "../core/message.hpp"
 #include "dcm_socket_session.hpp"
 namespace dcm {
     namespace streamsocket {

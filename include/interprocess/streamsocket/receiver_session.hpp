@@ -15,10 +15,10 @@ namespace interproc {
         class receiver_session : public std::enable_shared_from_this<receiver_session<socket_type>> {
         private:
             std::shared_ptr<socket_type> socket_;
+            bool eof_;
         protected:
             std::shared_ptr<reader<socket_type>> reader_;
             std::shared_ptr<writer<socket_type>> writer_;
-
         public:
 
             // Constructor
@@ -31,11 +31,18 @@ namespace interproc {
                 this->writer_->on_fail = this->reader_->on_fail = [this](const asio::error_code &error) {
                     if (error) {
                         std::cerr << error.message() << std::endl;
+                        eof_ = true;
                         if (on_error) on_error(this->shared_from_this());
                     }
                 };
 
-                this->on_message = reader_->on_success;
+                eof_ = false;
+                this->reader_->on_success = [this](buffer_type &&_buffer){
+                    if (this->on_message) this->on_message(std::move(_buffer));
+                    if (!eof_) {
+                        this->reader_->read();
+                    }
+                };
             }
 
             virtual ~receiver_session() {
