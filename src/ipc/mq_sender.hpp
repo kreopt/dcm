@@ -2,7 +2,7 @@
 #define __DCM_MQ_SERVER_H_
 
 #include <string>
-#include "core/buffer.hpp"
+#include <interprocess/interproc.hpp>
 
 namespace dcm {
     namespace ipc {
@@ -11,7 +11,7 @@ namespace dcm {
             public:
                 void open(const std::string &_name);
                 void close(const std::string &_name);
-                void send(const dcm::buffer &_data);
+                void send(const interproc::buffer &_data);
             };
         }
     }

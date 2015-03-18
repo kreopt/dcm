@@ -14,10 +14,10 @@ file(GLOB_RECURSE HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include/**/*.hpp)
 
 set(SOURCE_FILES ${SOURCES} ${HEADERS})
-add_library(dcm SHARED ${SOURCE_FILES} src/socket/dcm_socket_client.hpp src/socket/dcm_socket_server.hpp src/socket/dcm_socket_session.hpp include/netlib.hpp)
+add_library(dcm SHARED ${SOURCE_FILES} )
 
-add_executable(dcm_server ${SOURCE_FILES} server.cpp)
-add_executable(dcm_client ${SOURCE_FILES} client.cpp)
+add_executable(dcm_server ${SOURCE_FILES} receiver.cpp)
+add_executable(dcm_client ${SOURCE_FILES} sender.cpp)
 
 set(BOOST_LIBS boost_system rt pthread)
 

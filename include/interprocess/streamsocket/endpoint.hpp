@@ -1,12 +1,12 @@
-#ifndef __NETLIB_ENDPOINT_H_
-#define __NETLIB_ENDPOINT_H_
+#ifndef __INTERPROC_ENDPOINT_H_
+#define __INTERPROC_ENDPOINT_H_
 
 #include <type_traits>
 #include <regex>
 #include <asio/local/stream_protocol.hpp>
 #include <asio/ip/tcp.hpp>
 
-namespace netlib {
+namespace interproc {
     template <  typename endpoint_type,
                 typename = typename std::enable_if<
                                 std::is_same<endpoint_type, asio::ip::tcp::endpoint>::value ||

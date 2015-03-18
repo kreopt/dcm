@@ -16,7 +16,7 @@ void dcm::ipc::shm::sender::close(const std::string &_name) {
     maps_.erase(_name);
 }
 
-void dcm::ipc::shm::sender::send(const std::string &_name, const dcm::buffer &_data) {
+void dcm::ipc::shm::sender::send(const std::string &_name, const interproc::buffer &_data) {
     try {
         auto &shmem_write = maps_.at(_name).first;
         shmem_write.truncate(_data.size());

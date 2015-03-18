@@ -2,7 +2,6 @@
 
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <thread>
-#include "core/buffer.hpp"
 #include "core/message.hpp"
 
 namespace bip = boost::interprocess;
@@ -20,11 +19,11 @@ void dcm::ipc::mq::receiver::listen() {
     size_t recvd_size;
     uint priority;
     while (!stop_) {
-        auto raw_msg = std::shared_ptr<char>(new char[MAX_MESSAGE_SIZE]);
+        auto raw_msg = std::shared_ptr<char>(new char[MAX_MESSAGE_SIZE], [](char* _p){delete [] _p;});
         mq_->receive(raw_msg.get(), MAX_MESSAGE_SIZE, recvd_size, priority);
         if (on_message){
             dcm::message msg;
-            dcm::buffer encoded(raw_msg.get(), recvd_size);
+            interproc::buffer encoded(raw_msg.get(), recvd_size);
             msg.decode_header(encoded);
             on_message(std::move(msg));
         }

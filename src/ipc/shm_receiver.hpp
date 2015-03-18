@@ -2,13 +2,14 @@
 #define __DCM_SHM_CLIENT_H_
 
 #include <string>
-#include "core/buffer.hpp"
+#include <interprocess/interproc.hpp>
+
 namespace dcm {
     namespace ipc {
         namespace shm {
             class receiver {
             public:
-                dcm::buffer get(const std::string &_name);
+                interproc::buffer get(const std::string &_name);
             };
         }
     }

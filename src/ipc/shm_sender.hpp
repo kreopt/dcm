@@ -5,7 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include <boost/interprocess/shared_memory_object.hpp>
-#include "core/buffer.hpp"
+#include <interprocess/interproc.hpp>
 
 namespace dcm {
     namespace ipc {
@@ -27,7 +27,7 @@ namespace dcm {
             public:
                 void open(const std::string &_name);
                 void close(const std::string &_name);
-                void send(const std::string &_name, const dcm::buffer &_data);
+                void send(const std::string &_name, const interproc::buffer &_data);
             };
         }
     }
