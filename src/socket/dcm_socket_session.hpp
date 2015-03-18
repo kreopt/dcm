@@ -41,6 +41,7 @@ namespace dcm {
                 this->reader_->read(interproc::BLOCK_SIZE_SIZE);
             }
 
+            std::function<void(std::shared_ptr<receiver_session<socket_type, buffer_type>> _session)> on_connect;
             std::function<void(std::shared_ptr<receiver_session<socket_type, buffer_type>> _session)> on_error;
         };
     }

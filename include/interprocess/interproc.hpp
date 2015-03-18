@@ -4,6 +4,7 @@
 #include <sstream>
 #include <type_traits>
 #include <functional>
+#include <memory>
 #include <asio/error_code.hpp>
 
 namespace interproc {
@@ -35,6 +36,13 @@ namespace interproc {
     }
 
     template <typename buffer_type = interproc::buffer >
+    class session{
+    public:
+        virtual ~session() {};
+        virtual void send(const buffer_type &_buf) = 0;
+    };
+
+    template <typename buffer_type = interproc::buffer >
     class receiver {
     public:
         typedef typename std::remove_reference<buffer_type>::type buf_type;
@@ -51,6 +59,7 @@ namespace interproc {
         // TODO: send to single instance
 
         std::function<void(buffer_type &&_buf)> on_message;
+        std::function<void(std::shared_ptr<session<buffer_type>>)> on_connect;
     };
 
     template <typename buffer_type = interproc::buffer >

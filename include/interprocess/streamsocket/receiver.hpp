@@ -47,6 +47,7 @@ namespace interproc {
                 new_session->on_error = [this](std::shared_ptr<session_type> _session) {
                     sessions_.erase(_session);
                 };
+                new_session->on_connect = on_connect;
                 sessions_.insert(new_session);
                 //acceptor_->set_option(asio::ip::tcp::acceptor::reuse_address(true));
                 acceptor_->async_accept(*new_session->socket(),

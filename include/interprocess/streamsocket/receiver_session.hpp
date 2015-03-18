@@ -12,10 +12,11 @@
 namespace interproc {
     namespace streamsocket {
         template<typename socket_type, typename buffer_type = interproc::buffer >
-        class receiver_session : public std::enable_shared_from_this<receiver_session<socket_type>> {
+        class receiver_session : public session<buffer_type>, public std::enable_shared_from_this<receiver_session<socket_type>> {
         private:
             std::shared_ptr<socket_type> socket_;
             bool eof_;
+            bool started_;
         protected:
             std::shared_ptr<reader<socket_type>> reader_;
             std::shared_ptr<writer<socket_type>> writer_;
@@ -25,6 +26,7 @@ namespace interproc {
             explicit receiver_session(asio::io_service &io_service)
                     : socket_(std::make_shared<socket_type>(io_service)) {
 
+                started_ = false;
                 reader_ = std::make_shared<reader<socket_type>>(socket_);
                 writer_ = std::make_shared<writer<socket_type>>(socket_);
 
@@ -52,14 +54,19 @@ namespace interproc {
                 std::cout << "destroy session" << std::endl;
             }
 
-            virtual void send(const buffer_type &_buf) {
-                this->writer_->write(_buf);
+            virtual void send(const buffer_type &_buf) override {
+                // TODO: only after start
+                if (started_) {
+                    this->writer_->write(_buf);
+                }
             }
 
             // Session operations
             virtual void start() {
                 // Check input buffer
                 this->reader_->read();
+                started_ = true;
+                if (on_connect) on_connect(this->shared_from_this());
             }
 
             // Overloads
@@ -69,6 +76,7 @@ namespace interproc {
 
             std::function<void(buffer_type && _buf)> on_message;
             std::function<void(std::shared_ptr<receiver_session<socket_type, buffer_type>> _session)> on_error;
+            std::function<void(std::shared_ptr<receiver_session<socket_type, buffer_type>> _session)> on_connect;
         };
     }
 }
