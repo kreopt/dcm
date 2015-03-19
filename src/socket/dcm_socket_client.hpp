@@ -2,6 +2,8 @@
 #define _DCM_DCM_SOCKET_CLIENT_HPP_
 
 #include <specforge/interprocess/streamsocket/sender.hpp>
+#include "../core/message.hpp"
+
 namespace dcm {
     namespace streamsocket {
 
@@ -32,7 +34,7 @@ namespace dcm {
         using tcp_sender = stream_socket_sender<asio::ip::tcp>;
         using unix_sender = stream_socket_sender<asio::local::stream_protocol>;
 
-        inline std::shared_ptr<interproc::sender<dcm::message>> make_sender(interproc::streamsocket_type _type, const std::string &_ep) {
+        inline std::shared_ptr<dcm_sender_t> make_sender(interproc::streamsocket_type _type, const std::string &_ep) {
             switch (_type) {
                 case interproc::streamsocket_type::unix:
                     return std::make_shared<unix_sender>(_ep);

@@ -1,5 +1,5 @@
-#ifndef NET_SESSION
-#define NET_SESSION
+#ifndef __INTERPROC_RECEIVER_SESSION_HPP__
+#define __INTERPROC_RECEIVER_SESSION_HPP__
 
 #include <asio.hpp>
 #include <error.h>
@@ -12,7 +12,7 @@
 namespace interproc {
     namespace streamsocket {
         template<typename socket_type, typename buffer_type = interproc::buffer >
-        class receiver_session : public session<buffer_type>, public std::enable_shared_from_this<receiver_session<socket_type>> {
+        class receiver_session : public interproc::session<buffer_type>, public std::enable_shared_from_this<receiver_session<socket_type>> {
         private:
             std::shared_ptr<socket_type> socket_;
             bool eof_;

@@ -1,5 +1,5 @@
-#ifndef __interproc_SOCKET_SERVER_
-#define __interproc_SOCKET_SERVER_
+#ifndef __INTERPROC_SOCKET_SERVER_
+#define __INTERPROC_SOCKET_SERVER_
 
 #include <list>
 #include <set>
@@ -17,7 +17,7 @@ namespace interproc {
     namespace streamsocket {
 
         // tcp_server class
-        template <typename protocol_type, template <typename, typename> class session_type_tpl = receiver_session>
+        template <typename protocol_type, template <typename, typename> class session_type_tpl = interproc::streamsocket::receiver_session>
         class receiver_impl : public receiver<> {
         private:
 
@@ -118,8 +118,8 @@ namespace interproc {
             };
         };
 
-        using tcp_receiver = receiver_impl<asio::ip::tcp>;
-        using unix_receiver = receiver_impl<asio::local::stream_protocol>;
+        using tcp_receiver = receiver_impl<asio::ip::tcp, interproc::streamsocket::receiver_session>;
+        using unix_receiver = receiver_impl<asio::local::stream_protocol, interproc::streamsocket::receiver_session>;
 
         inline std::shared_ptr<receiver<>> make_receiver(streamsocket_type _type, const std::string &_ep) {
             switch (_type) {

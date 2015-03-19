@@ -2,13 +2,15 @@
 #define _DCM_DCM_SOCKET_SERVER_HPP_
 
 #include <specforge/interprocess/streamsocket/receiver.hpp>
-#include "../core/message.hpp"
 #include "dcm_socket_session.hpp"
+#include "../core/message.hpp"
+
 namespace dcm {
     namespace streamsocket {
+        using dcm_receiver_t = interproc::receiver<dcm::message>;
         // tcp_server class
         template<typename protocol_type>
-        class stream_socket_receiver : public interproc::receiver<dcm::message> {
+        class stream_socket_receiver : public dcm_receiver_t {
             std::shared_ptr<interproc::receiver<interproc::buffer>> receiver_;
         public:
             // Constructor
@@ -39,7 +41,7 @@ namespace dcm {
         using tcp_receiver = stream_socket_receiver<asio::ip::tcp>;
         using unix_receiver = stream_socket_receiver<asio::local::stream_protocol>;
 
-        inline std::shared_ptr<interproc::receiver<dcm::message>> make_receiver(interproc::streamsocket_type _type, const std::string &_ep) {
+        inline std::shared_ptr<dcm_receiver_t> make_receiver(interproc::streamsocket_type _type, const std::string &_ep) {
             switch (_type) {
                 case interproc::streamsocket_type::unix: {
                     std::remove(_ep.c_str());

@@ -96,3 +96,8 @@ interproc::buffer dcm::message::encode_header() const {
 interproc::buffer dcm::message::encode_body() const {
     return encode_block(body);
 }
+
+dcm::message::message(dcm::message::block_t &&_header, dcm::message::block_t &&_body) {
+    header = _header;
+    body = _body;
+}

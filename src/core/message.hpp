@@ -27,6 +27,8 @@ namespace dcm {
 
         message(interproc::buffer &&_encoded);
 
+        message(block_t &&_header, block_t &&_body);
+
         message(dcm::message &&_message);
         message(const dcm::message &_message) = default;
 
