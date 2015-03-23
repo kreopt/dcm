@@ -10,8 +10,9 @@
 namespace dcm {
 // message class
     class message : dcm::imessage {
+    public:
+            using block_t = std::unordered_map<std::string, interproc::buffer>;
     private:
-        using block_t = std::unordered_map<std::string, interproc::buffer>;
 
         void decode_block(const interproc::buffer &_buf, block_t &_block);
 
