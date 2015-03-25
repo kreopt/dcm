@@ -17,7 +17,7 @@ set(SOURCE_FILES ${SOURCES} ${HEADERS})
 add_library(dcm SHARED ${SOURCE_FILES} )
 
 add_executable(dcm_server ${SOURCE_FILES} receiver.cpp)
-add_executable(dcm_client ${SOURCE_FILES} sender.cpp)
+add_executable(dcm_client ${SOURCE_FILES} sender.cpp json11.cpp)
 
 set(BOOST_LIBS boost_system rt pthread)
 
