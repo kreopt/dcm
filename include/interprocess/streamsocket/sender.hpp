@@ -119,6 +119,8 @@ namespace interproc {
                     }
                     can_close_mtx_.try_lock();
                     this->writer_->write(_buf);
+                } else {
+                    std::cout << "failed to send: disconnected" << std::endl;
                 }
             }
 

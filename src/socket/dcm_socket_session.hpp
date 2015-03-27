@@ -19,8 +19,8 @@ namespace dcm {
                         interproc::block_size_t block_size;
                         interproc::ibufstream bs(_buf);
                         interproc::read_size(bs, block_size);
-                        this->reader_->read(block_size);
                         is_size_ = !is_size_;
+                        this->reader_->read(block_size);
                     } else {
                         if (!is_header_) {
                             if (this->on_message) {
@@ -32,6 +32,10 @@ namespace dcm {
                         is_size_ = !is_size_;
                         this->reader_->read(interproc::BLOCK_SIZE_SIZE);
                     }
+                };
+                this->reader_->on_fail = [this](const asio::error_code &_ec) {
+                    read_mutex_.unlock();
+                    if (on_error) on_error(_ec);
                 };
             }
 

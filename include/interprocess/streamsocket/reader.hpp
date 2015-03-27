@@ -28,12 +28,16 @@ namespace interproc {
             };
 
             // TODO: protect against concurrent read into the same buffer
-            void read(std::size_t _size = 0, handler_t _handler = nullptr) {
-                if (_size) {
+            void read(int _size = -1, handler_t _handler = nullptr) {
+                if (_size >= 0) {
                     streambuf_read_ = false;
                     buffer_.resize(_size);
-                    char *bufstart = &buffer_[0];
-                    asio::async_read(*socket_, asio::buffer(bufstart, _size), (_handler ? _handler : default_handler_));
+                    if (_size) {
+                        char *bufstart = &buffer_[0];
+                        asio::async_read(*socket_, asio::buffer(bufstart, _size), (_handler ? _handler : default_handler_));
+                    } else {
+                        handle_read(asio::error_code());
+                    }
                 } else {
                     streambuf_read_ = true;
                     asio::async_read(*socket_, response_,
