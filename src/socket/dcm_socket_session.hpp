@@ -33,9 +33,9 @@ namespace dcm {
                         this->reader_->read(interproc::BLOCK_SIZE_SIZE);
                     }
                 };
-                this->reader_->on_fail = [this](const asio::error_code &_ec) {
-                    if (on_error) on_error(_ec);
-                };
+//                this->reader_->on_fail = [this](const asio::error_code &_ec) {
+//                    if (on_error) on_error(_ec);
+//                };
             }
 
             virtual void start() override {
