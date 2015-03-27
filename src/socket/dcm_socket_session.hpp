@@ -34,7 +34,6 @@ namespace dcm {
                     }
                 };
                 this->reader_->on_fail = [this](const asio::error_code &_ec) {
-                    read_mutex_.unlock();
                     if (on_error) on_error(_ec);
                 };
             }
