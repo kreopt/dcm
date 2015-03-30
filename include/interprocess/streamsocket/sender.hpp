@@ -113,6 +113,7 @@ namespace interproc {
 
             virtual void send(const buffer &_buf) override {
                 if (connected_) {
+                    std::cout << "try send" << std::endl;
                     {
                         std::lock_guard<std::mutex> lck(pending_ops_mtx_);
                         pending_count_++;
@@ -120,7 +121,7 @@ namespace interproc {
                     can_close_mtx_.try_lock();
                     this->writer_->write(_buf);
                 } else {
-                    std::cout << "failed to send: disconnected" << std::endl;
+                    std::cout << "failed to send: client disconnected" << std::endl;
                 }
             }
 
