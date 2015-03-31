@@ -1,7 +1,7 @@
 #ifndef _DCM_DCM_SOCKET_SERVER_HPP_
 #define _DCM_DCM_SOCKET_SERVER_HPP_
 
-#include <specforge/interprocess/streamsocket/receiver.hpp>
+#include <dcm/interprocess/streamsocket/receiver.hpp>
 #include "dcm_socket_session.hpp"
 #include "../core/message.hpp"
 

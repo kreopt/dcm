@@ -33,6 +33,6 @@ target_link_libraries(dcm_client
     ${BOOST_LIBS}
 )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION lib/specforge/)
-install(DIRECTORY src/ DESTINATION include/specforge/dcm/ FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY include/ DESTINATION include/specforge/ FILES_MATCHING PATTERN "*.hpp")
+install(TARGETS ${PROJECT_NAME} DESTINATION lib/dcm/)
+install(DIRECTORY src/ DESTINATION include/dcm/ FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY include/ DESTINATION include/dcm/ FILES_MATCHING PATTERN "*.hpp")

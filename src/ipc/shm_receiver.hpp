@@ -2,7 +2,7 @@
 #define __DCM_SHM_CLIENT_H_
 
 #include <string>
-#include <interprocess/interproc.hpp>
+#include <dcm/interprocess/interproc.hpp>
 
 namespace dcm {
     namespace ipc {

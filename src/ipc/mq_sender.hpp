@@ -2,7 +2,7 @@
 #define __DCM_MQ_SERVER_H_
 
 #include <string>
-#include <interprocess/interproc.hpp>
+#include <dcm/interprocess/interproc.hpp>
 
 namespace dcm {
     namespace ipc {

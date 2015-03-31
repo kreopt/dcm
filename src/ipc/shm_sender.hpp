@@ -5,7 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include <boost/interprocess/shared_memory_object.hpp>
-#include <interprocess/interproc.hpp>
+#include <dcm/interprocess/interproc.hpp>
 
 namespace dcm {
     namespace ipc {
