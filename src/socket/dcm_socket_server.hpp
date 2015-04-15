@@ -8,7 +8,13 @@
 
 namespace dcm {
     namespace streamsocket {
-        using dcm_receiver_t = interproc::receiver<dcm::message>;
+
+        class dcm_receiver_t : public interproc::receiver<dcm::message> {
+        public:
+            virtual std::shared_ptr<dcm_receiver_t> on(const std::string &_signal, std::function<void(const dcm::message&)> _handler) = 0;
+            virtual std::shared_ptr<dcm_receiver_t> off(const std::string &_signal) = 0;
+        };
+
         // tcp_server class
         template<typename protocol_type>
         class stream_socket_receiver : public dcm_receiver_t,
@@ -52,13 +58,13 @@ namespace dcm {
                 receiver_->join();
             };
 
-            virtual std::shared_ptr<stream_socket_receiver<protocol_type>> on(const std::string &_signal, std::function<void(const dcm::message&)> _handler) {
+            virtual std::shared_ptr<dcm_receiver_t> on(const std::string &_signal, std::function<void(const dcm::message&)> _handler) override {
                 std::lock_guard<std::mutex> lck(handler_mtx_);
                 handlers_[_signal] = _handler;
                 return this->shared_from_this();
             }
 
-            virtual std::shared_ptr<stream_socket_receiver<protocol_type>> off(const std::string &_signal) {
+            virtual std::shared_ptr<dcm_receiver_t> off(const std::string &_signal) override {
                 std::lock_guard<std::mutex> lck(handler_mtx_);
                 handlers_.erase(_signal);
                 return this->shared_from_this();
