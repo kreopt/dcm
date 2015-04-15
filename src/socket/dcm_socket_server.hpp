@@ -13,6 +13,7 @@ namespace dcm {
         public:
             virtual std::shared_ptr<dcm_receiver_t> on(const std::string &_signal, std::function<void(const dcm::message&)> _handler) = 0;
             virtual std::shared_ptr<dcm_receiver_t> off(const std::string &_signal) = 0;
+            virtual std::shared_ptr<dcm_receiver_t> fail(std::function<void(std::exception &e)>) = 0;
         };
 
         // tcp_server class
@@ -22,11 +23,13 @@ namespace dcm {
             std::shared_ptr<interproc::receiver<interproc::buffer>> receiver_;
             std::unordered_map<std::string, std::function<void(const dcm::message&)>> handlers_;
             std::mutex handler_mtx_;
+            // TODO: handle generic exceptions
+            std::function<void(std::exception &e)> exc_handler_;
         public:
             // Constructor
             explicit stream_socket_receiver(const std::string &_endpoint) :
                     receiver_(std::make_shared<interproc::streamsocket::receiver_impl<protocol_type, dcm::streamsocket::receiver_session>>(_endpoint)) {
-                receiver_->on_message = [this](interproc::buffer &&_buf){
+                receiver_->on_message = [this](const interproc::buffer &_buf){
                     if (this->on_message) {
                         this->on_message(dcm::message(_buf));
                     }
@@ -36,7 +39,13 @@ namespace dcm {
                         auto sig_name = msg.header.at("signal");
                         std::lock_guard<std::mutex> lck(handler_mtx_);
                         if (handlers_.count(sig_name)) {
-                            handlers_.at(sig_name)(msg);
+                            try {
+                                handlers_.at(sig_name)(msg);
+                            } catch (std::exception &e){
+                                if (exc_handler_){
+                                    exc_handler_(e);
+                                }
+                            }
                         }
                     }
                 };
@@ -67,6 +76,11 @@ namespace dcm {
             virtual std::shared_ptr<dcm_receiver_t> off(const std::string &_signal) override {
                 std::lock_guard<std::mutex> lck(handler_mtx_);
                 handlers_.erase(_signal);
+                return this->shared_from_this();
+            }
+
+            virtual std::shared_ptr<dcm_receiver_t> fail(std::function<void(std::exception &e)> _exc_handler) override {
+                exc_handler_ = _exc_handler;
                 return this->shared_from_this();
             }
 

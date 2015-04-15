@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 //        }
 
         auto server = dcm::streamsocket::make_receiver(interproc::streamsocket_type::unix, "unix_server.sock");
-        server->on_message = [](dcm::message &&_message) {
+        server->on_message = [](const dcm::message &_message) {
             std::cout << "caught " << _message.header.at("signal") << " signal with data: "<< _message.body.at("data") << std::endl;
             // TODO: run subscription resolver
             // TODO: IPC: MP send header
