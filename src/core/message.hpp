@@ -5,11 +5,58 @@
 #include <string>
 #include <map>
 #include <unordered_map>
+#include <vector>
 #include <dcm/interprocess/interproc.hpp>
-#include "imessage.hpp"
+
 namespace dcm {
+
+    enum class message_param_type {
+        str,
+        num,
+        raw
+    };
+
+    class message_block_t : public interproc::buffer {
+        std::unordered_map<std::string, std::pair<interproc::buffer, message_param_type>> values_;
+        bool dirty_;
+    public:
+        using interproc::buffer::buffer;
+
+        // TODO: encode data within these functions
+        virtual const interproc::byte_t* data() const override;
+        virtual interproc::byte_t* data();
+        size_t size() const;
+
+        void set();
+        void get();
+        void erase();
+    };
+
+    class message_t : public interproc::buffer {
+        std::vector<message_block_t> blocks_;
+        bool dirty_;
+    public:
+        using interproc::buffer::buffer;
+
+        // TODO: encode data within these functions
+        virtual const interproc::byte_t* data() const override;
+        virtual interproc::byte_t* data();
+        size_t size() const;
+    };
+
+    class signal_t : public message_t {
+    public:
+        using message_t::message_t;
+
+        void set_header();
+        void erase_header();
+        void set_data();
+        void erase_data();
+        const std::string name() const;
+    };
+
 // message class
-    class message : dcm::imessage {
+    /*class message : dcm::imessage {
     public:
             using block_t = std::unordered_map<std::string, interproc::buffer>;
     private:
@@ -45,6 +92,6 @@ namespace dcm {
 
         block_t header;
         block_t body;
-    };
+    };*/
 }
 #endif

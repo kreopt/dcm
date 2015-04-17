@@ -40,6 +40,7 @@ namespace dcm {
                         std::lock_guard<std::mutex> lck(handler_mtx_);
                         if (handlers_.count(sig_name)) {
                             try {
+                                // TODO: async
                                 handlers_.at(sig_name)(msg);
                             } catch (std::exception &e){
                                 if (exc_handler_){
@@ -67,6 +68,8 @@ namespace dcm {
                 receiver_->join();
             };
 
+
+            // TODO: move to subscriber
             virtual std::shared_ptr<dcm_receiver_t> on(const std::string &_signal, std::function<void(const dcm::message&)> _handler) override {
                 std::lock_guard<std::mutex> lck(handler_mtx_);
                 handlers_[_signal] = _handler;
