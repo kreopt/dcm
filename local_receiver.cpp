@@ -3,6 +3,7 @@
 #include <iostream>
 #include <functional>
 #include <asio.hpp>
+#include <thread>
 
 #include "socket/dcm_socket_server.hpp"
 
@@ -26,9 +27,9 @@ int main(int argc, char *argv[]) {
 //            servers.push_back(receiver);
 //        }
 
-        auto server = dcm::streamsocket::make_receiver(interproc::streamsocket_type::unix, "unix_server.sock");
-        server->on_message = [](const dcm::message &_message) {
-            std::cout << "caught " << _message.header.at("signal") << " signal with data: "<< _message.body.at("data") << std::endl;
+        auto server = dcm::streamsocket::make_receiver(interproc::conn_type::unix, "unix_server.sock");
+        server->on_message = [](const dcm::signal &_message) {
+            std::cout << "caught " << _message.name() << " signal with data: "<< _message.get_data("data") << std::endl;
             // TODO: run subscription resolver
             // TODO: IPC: MP send header
             // TODO: IPC: ShMem send body
@@ -36,6 +37,7 @@ int main(int argc, char *argv[]) {
         server->start();
         // Run the io_service
         std::this_thread::sleep_for(std::chrono::seconds(5));
+        server->wait_until_stopped();
     } catch (std::exception &e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }

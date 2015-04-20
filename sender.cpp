@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 //        tcp_client sender(*io_service, iterator);
 //        std::thread client_thread([&io_service](){io_service->run();});
 
-        auto sender = dcm::streamsocket::make_sender(interproc::streamsocket_type::unix, argv[1]);
+        auto sender = dcm::streamsocket::make_sender(interproc::conn_type::unix, argv[1]);
         sender->connect();
 
         int i = 0;
@@ -47,8 +47,7 @@ int main(int argc, char *argv[]) {
             std::cout << std::endl << "data in json: ";
             std::getline(std::cin, json_data);
 
-            dcm::message message;
-            message.header["signal"] = sig_name;
+            dcm::signal message(sig_name);
             try {
                 std::string err;
                 json11::Json json = json11::Json::parse(json_data, err);
@@ -58,7 +57,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 for (auto &e: json.object_items()) {
-                    message.body[e.first] = e.second.string_value();
+                    message.set_data(e.first, interproc::to_buffer(e.second.string_value()));
                 }
             } catch(...){
                 std::cerr << "bad input" << std::endl;

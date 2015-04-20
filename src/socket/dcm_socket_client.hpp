@@ -7,7 +7,7 @@
 namespace dcm {
     namespace streamsocket {
 
-        using dcm_sender_t = interproc::sender<dcm::message>;
+        using dcm_sender_t = interproc::sender<dcm::signal>;
         template<typename protocol_type>
         class stream_socket_sender : public dcm_sender_t {
             std::shared_ptr<interproc::sender<interproc::buffer>> sender_;
@@ -22,23 +22,23 @@ namespace dcm {
                 sender_->connect();
             };
 
-            virtual void send(const dcm::message &_msg) {
+            virtual void send(const dcm::signal &_msg) {
                 sender_->send(_msg.encode());
             };
 
-            virtual void close(const asio::error_code &error = asio::error_code()) {
-                sender_->close(error);
+            virtual void close() {
+                sender_->close();
             };
         };
 
         using tcp_sender = stream_socket_sender<asio::ip::tcp>;
         using unix_sender = stream_socket_sender<asio::local::stream_protocol>;
 
-        inline std::shared_ptr<dcm_sender_t> make_sender(interproc::streamsocket_type _type, const std::string &_ep) {
+        inline std::shared_ptr<dcm_sender_t> make_sender(interproc::conn_type _type, const std::string &_ep) {
             switch (_type) {
-                case interproc::streamsocket_type::unix:
+                case interproc::conn_type::unix:
                     return std::make_shared<unix_sender>(_ep);
-                case interproc::streamsocket_type::tcp:
+                case interproc::conn_type::tcp:
                     return std::make_shared<tcp_sender>(_ep);
             }
         };

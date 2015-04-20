@@ -20,7 +20,7 @@ namespace dcm {
 
                 void listen();
 
-                std::function<void(::dcm::message &&_message)> on_message;
+                std::function<void(dcm::signal &&_message)> on_message;
             };
         }
     }

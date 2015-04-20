@@ -22,9 +22,8 @@ void dcm::ipc::mq::receiver::listen() {
         auto raw_msg = std::shared_ptr<char>(new char[MAX_MESSAGE_SIZE], [](char* _p){delete [] _p;});
         mq_->receive(raw_msg.get(), MAX_MESSAGE_SIZE, recvd_size, priority);
         if (on_message){
-            dcm::message msg;
-            interproc::buffer encoded(raw_msg.get(), recvd_size);
-            msg.decode_header(encoded);
+            dcm::signal msg(interproc::buffer(raw_msg.get(), recvd_size));
+            //msg.decode_header(encoded);
             on_message(std::move(msg));
         }
         std::this_thread::yield();
