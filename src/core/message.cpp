@@ -103,7 +103,7 @@ dcm::message::message(dcm::message::block_t &&_header, dcm::message::block_t &&_
 }
 */
 
-const interproc::buffer dcm::signal::encode_block(const dcm::signal::message_block_t &_block) const {
+const interproc::buffer dcm::signal::encode_block(const dcm::signal::message_block_t &_block) {
     interproc::obufstream ba;
     interproc::write_size(ba, 0);
     interproc::block_size_t block_size = 0;
@@ -122,7 +122,7 @@ const interproc::buffer dcm::signal::encode_block(const dcm::signal::message_blo
     return interproc::to_buffer(ba.str());
 }
 
-dcm::signal::message_block_t dcm::signal::decode_block(const interproc::buffer&_buf) const {
+dcm::signal::message_block_t dcm::signal::decode_block(const interproc::buffer&_buf) {
     std::string key;
     interproc::buffer val;
     interproc::ibufstream bs(_buf);
@@ -182,7 +182,8 @@ interproc::buffer dcm::signal::encode() const {
     return interproc::to_buffer(ba.str());
 }
 
-void dcm::signal::decode(const interproc::buffer &_buf) {;
+dcm::signal dcm::signal::decode(const interproc::buffer &_buf) {
+    dcm::signal s("");
     interproc::ibufstream bs0(_buf);
     interproc::ibufstream bs(interproc::buffer(_buf, interproc::BLOCK_SIZE_SIZE));
     interproc::block_size_t pkg_len = 0;
@@ -192,7 +193,7 @@ void dcm::signal::decode(const interproc::buffer &_buf) {;
     if (len > pkg_len || pkg_len != _buf.length()-interproc::BLOCK_SIZE_SIZE) {
         throw decode_error("bad block length");
     }
-    header_ = decode_block(interproc::buffer(_buf, 2*interproc::BLOCK_SIZE_SIZE, len));
+    s.header_ = decode_block(interproc::buffer(_buf, 2*interproc::BLOCK_SIZE_SIZE, len));
 
     interproc::ibufstream bbs(interproc::buffer(_buf, 2*interproc::BLOCK_SIZE_SIZE+len));
     interproc::block_size_t len1 = 0;
@@ -201,13 +202,18 @@ void dcm::signal::decode(const interproc::buffer &_buf) {;
     if (len+len1 > pkg_len) {
         throw decode_error("bad block length");
     }
-    body_ = decode_block(interproc::buffer(_buf.begin()+3*interproc::BLOCK_SIZE_SIZE+len, _buf.end()));
-}
-
-dcm::signal::signal(const interproc::buffer &_buf) {
-    decode(_buf);
+    s.body_ = decode_block(interproc::buffer(_buf.begin()+3*interproc::BLOCK_SIZE_SIZE+len, _buf.end()));
+    return s;
 }
 
 dcm::signal::signal(const std::string &_name) {
     header_["signal"] = interproc::to_buffer(_name);
+}
+
+bool dcm::signal::has_data(const std::string &_key) const {
+    return body_.count(_key) > 0;
+}
+
+bool dcm::signal::has_header(const std::string &_key) const {
+    return header_.count(_key) > 0;
 }

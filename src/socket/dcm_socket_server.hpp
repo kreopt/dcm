@@ -30,7 +30,7 @@ namespace dcm {
                     receiver_(std::make_shared<interproc::streamsocket::listener_impl<protocol_type>>(_endpoint)) {
                 receiver_->on_message = [this](const interproc::buffer &_buf){
                     if (this->on_message) {
-                        this->on_message(dcm::signal(_buf));
+                        this->on_message(dcm::signal::decode(_buf));
                     }
 
                     auto msg = dcm::signal(_buf);

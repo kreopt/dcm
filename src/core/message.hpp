@@ -23,10 +23,8 @@ namespace dcm {
         message_block_t   header_;
         message_block_t   body_;
 
-        void decode(const interproc::buffer &_buf);
-
-        message_block_t decode_block(const interproc::buffer&_buf) const;
-        const interproc::buffer encode_block(const message_block_t &_block) const;
+        static message_block_t decode_block(const interproc::buffer&_buf);
+        static const interproc::buffer encode_block(const message_block_t &_block);
 
     public:
         class decode_error : public std::runtime_error {
@@ -37,18 +35,20 @@ namespace dcm {
         signal() = delete;
         signal(const signal& _sig) = default;
         signal(signal&& _sig) = default;
-        signal(const interproc::buffer &_buf);
         explicit signal(const std::string &_name);
 
         interproc::buffer encode() const;
+        static signal decode(const interproc::buffer &_buf);
 
 
         void set_header(const std::string &_key, const interproc::buffer &_value);
         void erase_header(const std::string &_key);
         interproc::buffer get_header(const std::string &_key) const;
+        bool has_header(const std::string &_key) const;
         void set_data(const std::string &_key, const interproc::buffer &_value);
         void erase_data(const std::string &_key);
         interproc::buffer get_data(const std::string &_key) const;
+        bool has_data(const std::string &_key) const;
         inline const std::string name() const { return header_.at("signal");};
     };
 
