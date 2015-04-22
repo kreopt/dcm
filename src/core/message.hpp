@@ -49,6 +49,11 @@ namespace dcm {
         void erase_data(const std::string &_key);
         interproc::buffer get_data(const std::string &_key) const;
         bool has_data(const std::string &_key) const;
+
+
+        inline const message_block_t& headers() const { return header_; };
+        inline const message_block_t& data() const { return header_; };
+
         inline const std::string name() const { return header_.at("signal");};
     };
 
