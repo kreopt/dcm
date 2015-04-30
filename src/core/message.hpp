@@ -51,7 +51,7 @@ namespace dcm {
 
 
         inline const message_block_t& headers() const { return header_; };
-        inline const message_block_t& data() const { return header_; };
+        inline const message_block_t& data() const { return body_; };
 
         inline const std::string name() const { return header_.at("signal");};
     };
