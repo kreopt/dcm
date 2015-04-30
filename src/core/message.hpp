@@ -32,10 +32,9 @@ namespace dcm {
             using std::runtime_error::runtime_error;
         };
 
-        signal() = delete;
         signal(const signal& _sig) = default;
         signal(signal&& _sig) = default;
-        explicit signal(const std::string &_name);
+        explicit signal(const std::string &_name="");
 
         interproc::buffer encode() const;
         static signal decode(const interproc::buffer &_buf);

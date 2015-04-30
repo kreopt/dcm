@@ -33,7 +33,7 @@ namespace dcm {
                         this->on_message(dcm::signal::decode(_buf));
                     }
 
-                    auto msg = dcm::signal(_buf);
+                    auto msg = dcm::signal(dcm::signal::decode(_buf));
                     try {
                         auto sig_name = msg.name();
                         std::lock_guard<std::mutex> lck(handler_mtx_);

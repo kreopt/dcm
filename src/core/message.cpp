@@ -183,15 +183,16 @@ interproc::buffer dcm::signal::encode() const {
 }
 
 dcm::signal dcm::signal::decode(const interproc::buffer &_buf) {
-    dcm::signal s("");
+    dcm::signal s;
     interproc::ibufstream bs0(_buf);
     interproc::ibufstream bs(interproc::buffer(_buf, interproc::BLOCK_SIZE_SIZE));
     interproc::block_size_t pkg_len = 0;
     interproc::block_size_t len = 0;
     interproc::read_size(bs0, pkg_len);
     interproc::read_size(bs, len);
+
     if (len > pkg_len || pkg_len != _buf.length()-interproc::BLOCK_SIZE_SIZE) {
-        throw decode_error("bad block length");
+        throw decode_error("bad block length: pkg_len="+std::to_string(pkg_len)+"; head_len="+std::to_string(len)+"; real_len="+std::to_string(_buf.length()));
     }
     s.header_ = decode_block(interproc::buffer(_buf, 2*interproc::BLOCK_SIZE_SIZE, len));
 
@@ -200,14 +201,16 @@ dcm::signal dcm::signal::decode(const interproc::buffer &_buf) {
     interproc::read_size(bbs, len1);
 
     if (len+len1 > pkg_len) {
-        throw decode_error("bad block length");
+        throw decode_error("bad block length: pkg_len="+std::to_string(pkg_len)+"; head_len="+std::to_string(len)+"; body_len="+std::to_string(len1)+"; real_len="+std::to_string(_buf.length()));
     }
     s.body_ = decode_block(interproc::buffer(_buf.begin()+3*interproc::BLOCK_SIZE_SIZE+len, _buf.end()));
     return s;
 }
 
 dcm::signal::signal(const std::string &_name) {
-    header_["signal"] = interproc::to_buffer(_name);
+    if (_name.length()) {
+        header_["signal"] = interproc::to_buffer(_name);
+    }
 }
 
 bool dcm::signal::has_data(const std::string &_key) const {
