@@ -35,4 +35,5 @@ target_link_libraries(dcm_client
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/dcm/)
 install(DIRECTORY src/ DESTINATION include/dcm/ FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY src/ DESTINATION include/dcm/ FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY include/ DESTINATION include/dcm/ FILES_MATCHING PATTERN "*.hpp")

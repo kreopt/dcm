@@ -14,6 +14,8 @@ namespace dcm {
             virtual std::shared_ptr<dcm_receiver_t> on(const std::string &_signal, std::function<void(const dcm::signal&)> _handler) = 0;
             virtual std::shared_ptr<dcm_receiver_t> off(const std::string &_signal) = 0;
             virtual std::shared_ptr<dcm_receiver_t> fail(std::function<void(std::exception &e)>) = 0;
+
+            using ptr = std::shared_ptr<dcm_receiver_t>;
         };
 
         template<typename protocol_type, typename buffer_type = interproc::buffer>
@@ -102,19 +104,19 @@ namespace dcm {
 
 
             // TODO: move to subscriber
-            virtual std::shared_ptr<dcm_receiver_t> on(const std::string &_signal, std::function<void(const dcm::signal&)> _handler) override {
+            virtual dcm_receiver_t::ptr on(const std::string &_signal, std::function<void(const dcm::signal&)> _handler) override {
                 std::lock_guard<std::mutex> lck(handler_mtx_);
                 handlers_[_signal] = _handler;
                 return this->shared_from_this();
             }
 
-            virtual std::shared_ptr<dcm_receiver_t> off(const std::string &_signal) override {
+            virtual dcm_receiver_t::ptr off(const std::string &_signal) override {
                 std::lock_guard<std::mutex> lck(handler_mtx_);
                 handlers_.erase(_signal);
                 return this->shared_from_this();
             }
 
-            virtual std::shared_ptr<dcm_receiver_t> fail(std::function<void(std::exception &e)> _exc_handler) override {
+            virtual dcm_receiver_t::ptr fail(std::function<void(std::exception &e)> _exc_handler) override {
                 exc_handler_ = _exc_handler;
                 return this->shared_from_this();
             }
@@ -124,7 +126,7 @@ namespace dcm {
         using tcp_receiver = stream_socket_receiver<asio::ip::tcp>;
         using unix_receiver = stream_socket_receiver<asio::local::stream_protocol>;
 
-        inline std::shared_ptr<dcm_receiver_t> make_receiver(interproc::conn_type _type, const std::string &_ep) {
+        inline dcm_receiver_t::ptr make_receiver(interproc::conn_type _type, const std::string &_ep) {
             switch (_type) {
                 case interproc::conn_type::unix: {
                     std::remove(_ep.c_str());
