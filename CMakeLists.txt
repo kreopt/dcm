@@ -14,7 +14,7 @@ file(GLOB_RECURSE HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include/**/*.hpp)
 
 set(SOURCE_FILES ${SOURCES} ${HEADERS})
-add_library(dcm SHARED ${SOURCE_FILES} )
+add_library(dcm SHARED ${SOURCE_FILES} src/dcm.hpp src/core/sender.hpp src/core/listener.hpp src/core/util.hpp src/core/protocols.hpp)
 
 add_executable(dcm_server ${SOURCE_FILES} local_receiver.cpp)
 add_executable(dcm_client ${SOURCE_FILES} sender.cpp json11.cpp)

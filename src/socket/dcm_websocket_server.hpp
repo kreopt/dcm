@@ -9,6 +9,15 @@
 namespace dcm {
     namespace streamsocket {
 
+        class dcm_receiver_t : public interproc::listener<dcm::signal> {
+        public:
+            virtual std::shared_ptr<dcm_receiver_t> on(const std::string &_signal, std::function<void(const dcm::signal&)> _handler) = 0;
+            virtual std::shared_ptr<dcm_receiver_t> off(const std::string &_signal) = 0;
+            virtual std::shared_ptr<dcm_receiver_t> fail(std::function<void(std::exception &e)>) = 0;
+
+            using ptr = std::shared_ptr<dcm_receiver_t>;
+        };
+
         template<typename protocol_type, typename buffer_type = interproc::buffer>
         class session : public interproc::streamsocket::listener_session<protocol_type>{
             bool is_size_;
